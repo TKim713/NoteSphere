@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 import UserDao from '../daos/user/index.js';
-import NoteListDao from '../daos/noteList/index.js';
+//import NoteListDao from '../daos/noteList/index.js';
 import CustomError from '../models/CustomError.js';
 
 export const fetchUser = async (userId) => {
@@ -30,9 +30,9 @@ export const signup = async (userDetails) => {
     password: encryptedPassword,
   });
 
-  await NoteListDao.create({
-    userId: newUser.id,
-  });
+  // await NoteListDao.create({
+  //   userId: newUser.id,
+  // });
 
   const payload = { user: { id: newUser.id } };
 
