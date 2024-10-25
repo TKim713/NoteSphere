@@ -27,6 +27,14 @@ class NoteListMongooseDao extends MongooseClass {
     );
   }
 
+  async addContentToNoteInList(userId, noteId, content) {
+    return await this.collection.findOneAndUpdate(
+      { userId, 'normalListOrder._id': noteId },
+      { $set: { 'normalListOrder.$.content': content } }
+    );
+  }
+  
+
   async addDuplicateToNormalList({ userId, existingNoteId, noteId }) {
     const noteList = await this.collection.findOne({ userId }).populate({
       path: 'normalListOrder',

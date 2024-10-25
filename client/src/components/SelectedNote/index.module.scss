@@ -86,14 +86,54 @@
     .body {
       padding: 0 10rem;
       width: 100%;
-
+    }
+    
+    .blockContainer {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      width: 100%;
+      position: relative;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.3s ease;
+    
+      // Optional: background color for the block on hover
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1); // Light background on hover
+      }
+    
+      .addButton {
+        visibility: hidden; // Initially hide the button
+        margin-left: 1rem; // Move the button to the left side
+        background-color: transparent;
+        border: 2px solid transparent; // Default border
+        border-radius: 0.5rem; // Rounded corners for the button
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: $color-light; // Ensure this variable is defined
+        height: 2rem;
+        transition: border-color 0.3s ease; // Smooth transition for border color
+    
+        // Highlight the button when the block is hovered
+        &:hover {
+          border-color: #f0ad4e; // Highlight border color
+        }
+      }
+    
+      // Show the button only when the block is hovered
+      &:hover .addButton {
+        visibility: visible; // Show the button on hover
+      }
+    
       .content {
-        padding: 1rem 0;
+        padding: 0.5rem 0;
         width: 100%;
         max-height: 100%;
         font-size: 1.6rem;
+    
         &::placeholder {
-          color: $color-placeholder;
+          color: $color-placeholder; // Ensure this variable is defined
         }
       }
     }

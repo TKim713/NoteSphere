@@ -10,17 +10,25 @@ import Modal from 'components/Modal';
 import EmojiPicker from 'components/EmojiPicker';
 
 import styles from './index.module.scss';
+import PopupMenu from 'components/PopupMenu';
 
 const SelectedNote = () => {
-  const { editSelectedNote, saveSelectedChanges, error } = useNote();
+  const { editSelectedNote, saveSelectedChanges, createNote } = useNote();
   const { selectedNote } = useNoteContext();
 
   const contentRef = useRef();
   const isFirstRender = useRef(true);
 
-  const { id, title, emoji, content } = selectedNote;
+  const { id, title, emoji, content = '' } = selectedNote || {}; // Handle undefined selectedNote
+
+  // Initialize content as an array of blocks
+  const [contentBlocks, setContentBlocks] = useState(
+    typeof content === 'string' ? content.split('\n') : ['']
+  );
 
   const [showPicker, setShowPicker] = useState(false);
+  const [showPopup, setShowPopup] = useState({ show: false, index: null }); // State for the popup menu
+  const [blockType, setBlockType] = useState('normal'); // Default to normal block
 
   const handleEmojiSelect = (e) => {
     editSelectedNote('emoji', e.native);
@@ -28,17 +36,58 @@ const SelectedNote = () => {
   };
 
   const handleKeyDown = (e, name) => {
-    if (name === 'title') {
-      if (e.key === 'Enter') {
-        e.preventDefault(0);
-        contentRef.current.focus();
-      }
+    if (name === 'title' && e.key === 'Enter') {
+      e.preventDefault();
+      contentRef.current.focus();
     }
   };
 
-  const handleFormChange = useCallback((e) => {
-    editSelectedNote(e.target.name, e.target.value);
-  });
+  const handleTitleChange = (e) => {
+    editSelectedNote('title', e.target.value); // Update title in state
+  };
+
+  const handleFormChange = useCallback((e, index) => {
+    const newContentBlocks = [...contentBlocks];
+    newContentBlocks[index] = e.target.value; // Update the specific block
+    setContentBlocks(newContentBlocks);
+
+    editSelectedNote('content', newContentBlocks.join('\n')); // Join blocks into content string
+  }, [contentBlocks]);
+
+  // Add a new block based on selected type
+  const addNewBlock = (index) => {
+    const newBlocks = [...contentBlocks];
+    newBlocks.splice(index + 1, 0, blockType === 'normal' ? '' : ''); // Add an empty block
+    setContentBlocks(newBlocks);
+    setShowPopup({ show: false, index: null }); // Close the popup after adding a block
+  };
+
+  const handleAddBlockClick = (index) => {
+    // Show popup for the specific block where "+" was clicked
+    setShowPopup({ show: true, index });
+  };
+
+  const handleSelect = (type, index) => {
+    if (type === 'normal') {
+      addNewBlock(index); // Adds a block at the correct index
+    } else if (type === 'note') {
+      createNewNote(); // Create a new note when "Note Block" is selected
+    }
+    // Close the popup after selecting an option
+    setShowPopup({ show: false, index: null });
+  };
+
+  // Function to create a new note
+  const createNewNote = async () => {
+    try {
+      // Call createNote from useNote
+      await createNote(); // This function will handle creating a new note
+      // Optionally, you can fetch or refresh notes here if needed
+    } catch (error) {
+      console.error("Error creating new note:", error);
+      // Handle the error appropriately (e.g., show a notification)
+    }
+  };
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -56,10 +105,7 @@ const SelectedNote = () => {
     <div className={styles.container}>
       <div className={styles.note}>
         <div className={styles.header}>
-          <div
-            onClick={() => setShowPicker(true)}
-            className={styles.emoji_wrapper}
-          >
+          <div onClick={() => setShowPicker(true)} className={styles.emoji_wrapper}>
             <div className={styles.emoji}>{emoji}</div>
           </div>
           <div className={styles.header_content}>
@@ -86,21 +132,29 @@ const SelectedNote = () => {
               value={title}
               name="title"
               placeholder="Untitled"
-              onKeyDown={handleKeyDown}
-              onInput={handleFormChange}
+              onKeyDown={(e) => handleKeyDown(e, 'title')}
+              onInput={handleTitleChange} // Ensure this function is correctly updating the title
               className={styles.title}
             />
           </div>
         </div>
         <div className={styles.body}>
-          <Editor
-            value={content}
-            name="content"
-            placeholder="Add note"
-            onInput={handleFormChange}
-            className={styles.content}
-            ref={contentRef}
-          />
+          {contentBlocks.map((block, index) => (
+            <div key={index} className={styles.blockContainer}>
+              <button onClick={() => handleAddBlockClick(index)} className={styles.addButton}>+</button>
+              <Editor
+                value={block}
+                name={`content-block-${index}`}
+                placeholder="Add note"
+                onInput={(e) => handleFormChange(e, index)} // Handle content block change
+                className={styles.content}
+                ref={index === 0 ? contentRef : null}
+              />
+              {showPopup.show && showPopup.index === index && (
+                <PopupMenu onSelect={(type) => handleSelect(type, index)} /> // Show PopupMenu for the correct block
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>

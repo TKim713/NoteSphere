@@ -1,0 +1,29 @@
+// Popup menu styles
+.popupMenu {
+    position: absolute; // Position it where you want relative to the button
+    background-color: white; // Background color
+    border: 1px solid $color-highlight; // Highlight border
+    z-index: 10; // Ensure it appears above other elements
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 0.3rem;
+    padding: 0.5rem;
+    
+    right: 100px;
+    top: 30px;
+
+  
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+  
+      li {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+  
+        &:hover {
+          background-color: $background-primary-h; // Highlight on hover
+        }
+      }
+    }
+  }    
