@@ -1,29 +1,26 @@
-import { useState } from 'react';
-
+import { useState } from "react";
 import {
   FaRegCommentAlt,
   FaRegClock,
   FaRegStar,
   FaStar,
   FaEllipsisH,
-} from 'react-icons/fa';
-
-import moment from 'moment';
-
-import { useNote } from 'hooks/useNote';
-
-import Modal from 'components/Modal';
-import EditElementMenu from 'components/EditElementMenu';
-
-import formatDate from 'utils/formatDate';
-
-import styles from './index.module.scss';
+} from "react-icons/fa";
+import moment from "moment";
+import { useNote } from "hooks/useNote";
+import Modal from "components/Modal";
+import EditElementMenu from "components/EditElementMenu";
+import ShareModal from "../ShareModal";
+import formatDate from "utils/formatDate";
+import styles from "./index.module.scss";
 
 const Header = ({ selectedNote }) => {
   const { favoriteNote, unfavoriteNote } = useNote();
 
   const [editMenuPosition, setEditMenuPosition] = useState(null);
   const [showEditMenu, setShowEditMenu] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareModalPosition, setShareModalPosition] = useState(null); // State for ShareModal position
 
   const handleToggleFavorite = async () => {
     if (selectedNote.isFavorite) {
@@ -40,6 +37,15 @@ const Header = ({ selectedNote }) => {
     const modalLeft = elementRect.left / 1.3;
     setEditMenuPosition({ top: modalTop, left: modalLeft });
     setShowEditMenu(true);
+  };
+
+  const handleOpenShareModal = (e) => {
+    e.preventDefault();
+    const elementRect = e.currentTarget.getBoundingClientRect();
+    const modalTop = elementRect.bottom + 4; // Position below the Share button
+    const modalLeft = Math.min(elementRect.left, window.innerWidth - 300); // Align to the left of the Share button, ensuring it doesn't overflow
+    setShareModalPosition({ top: modalTop, left: modalLeft });
+    setShowShareModal(true);
   };
 
   return (
@@ -60,6 +66,20 @@ const Header = ({ selectedNote }) => {
           />
         </Modal>
       )}
+
+      {/* ShareModal Logic */}
+      {showShareModal && (
+        <Modal
+          show={showShareModal}
+          close={() => setShowShareModal(false)}
+          modalPosition={shareModalPosition} // Pass the position state here
+          modalContainerClassName={styles.share_modal_container}
+          modalClassName={styles.share_modal}
+        >
+          <ShareModal close={() => setShowShareModal(false)} />
+        </Modal>
+      )}
+
       <header className={styles.header}>
         {selectedNote && (
           <div onClick={handleOpenEditModal} className={styles.title_wrapper}>
@@ -70,7 +90,7 @@ const Header = ({ selectedNote }) => {
               <p className={styles.title}>
                 {selectedNote.title.length > 0
                   ? selectedNote.title
-                  : 'Untitled'}
+                  : "Untitled"}
               </p>
             </>
           </div>
@@ -81,7 +101,9 @@ const Header = ({ selectedNote }) => {
               selectedNote.updatedAt &&
               formatDate(moment(selectedNote.updatedAt))}
           </p>
-          <p className={styles.share}>Share</p>
+          <p onClick={handleOpenShareModal} className={styles.share}>
+            Share
+          </p>
           <div className={styles.icon_wrapper}>
             <FaRegCommentAlt />
           </div>

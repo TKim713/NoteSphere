@@ -1,0 +1,73 @@
+.container {
+    position: absolute;
+  background: $background-modal;
+  border-radius: 0.4rem;
+  user-select: none;
+  box-shadow: $box-shadow-modal;
+  min-width: 27rem;
+  max-width: 36rem;
+  padding: 1rem;
+  z-index: 1000;
+
+  .header {
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: $color-lg;
+    }
+  }
+
+  .content {
+    margin-top: 1rem;
+
+    .userInfo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .userImage {
+        width: 3.2rem;
+        height: 3.2rem;
+        border-radius: 0.4rem;
+      }
+    }
+
+    .formGroup {
+      margin: 1rem 0;
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .emailInput {
+        width: 100%;
+        padding: 0.5rem;
+        // border: 1px solid $border-color;
+        border-radius: 0.4rem;
+      }
+
+      .permissionSelect {
+        width: 100%;
+        padding: 0.5rem;
+        // border: 1px solid $border-color;
+        border-radius: 0.4rem;
+        margin-top: 0.5rem;
+      }
+    }
+
+    .shareButton {
+    //   background: $primary-color;
+      color: white;
+      padding: 0.7rem 1.2rem;
+      border: none;
+      border-radius: 0.4rem;
+      cursor: pointer;
+
+      &:hover {
+        // background: darken($primary-color, 10%);
+      }
+    }
+  }
+}
