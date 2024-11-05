@@ -1,10 +1,9 @@
 .container {
-    position: absolute;
+  position: absolute;
   background: $background-modal;
   border-radius: 0.4rem;
   user-select: none;
-  box-shadow: $box-shadow-modal;
-  min-width: 27rem;
+  min-width: 29rem;
   max-width: 36rem;
   padding: 1rem;
   z-index: 1000;
@@ -25,10 +24,27 @@
       align-items: center;
       gap: 1rem;
 
-      .userImage {
+      .userAvatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 3.2rem;
         height: 3.2rem;
-        border-radius: 0.4rem;
+        border-radius: 50%;
+        background-color: $background-button;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .userDetails {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        p {
+          margin: 0;
+        }
       }
     }
 
@@ -41,33 +57,47 @@
         margin-bottom: 0.5rem;
       }
 
-      .emailInput {
-        width: 100%;
-        padding: 0.5rem;
-        // border: 1px solid $border-color;
-        border-radius: 0.4rem;
-      }
+      .emailInputContainer {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
 
-      .permissionSelect {
-        width: 100%;
-        padding: 0.5rem;
-        // border: 1px solid $border-color;
-        border-radius: 0.4rem;
-        margin-top: 0.5rem;
+        .emailInput {
+          flex: 1;
+          padding: 0.5rem;
+          border-radius: 0.4rem;
+          background: $background-modal;
+          color: white;
+          border: 1px solid $background-button;
+          &:focus {
+            // Removes the default outline
+            outline-color: $background-button;
+            outline-style: 2px groove;
+          }
+        }
+
+        .shareButton {
+          background: $background-button;
+          color: white;
+          padding: 0.7rem 1.2rem;
+          border: none;
+          border-radius: 0.4rem;
+          cursor: pointer;
+
+          &:hover {
+            background-color: $background-modal-h;
+          }
+        }
       }
     }
 
-    .shareButton {
-    //   background: $primary-color;
-      color: white;
-      padding: 0.7rem 1.2rem;
-      border: none;
+    .permissionSelect {
+      padding: 0.5rem;
       border-radius: 0.4rem;
-      cursor: pointer;
-
-      &:hover {
-        // background: darken($primary-color, 10%);
-      }
+      border: none;
+      background-color: $background-modal;
+      color: white;
+      width: 80px;
     }
   }
 }
