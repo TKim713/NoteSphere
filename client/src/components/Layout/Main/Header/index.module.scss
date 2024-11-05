@@ -59,6 +59,16 @@
         cursor: pointer;
       }
     }
+    .share_modal_container {
+      position: absolute;
+    }
+    
+    .share_modal {
+      position: absolute;
+      top: var(--modal-top);
+      left: var(--modal-left);
+    }
+    
 
     .icon_wrapper {
       display: flex;

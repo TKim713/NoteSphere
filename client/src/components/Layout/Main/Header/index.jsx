@@ -13,14 +13,16 @@ import EditElementMenu from "components/EditElementMenu";
 import ShareModal from "../ShareModal";
 import formatDate from "utils/formatDate";
 import styles from "./index.module.scss";
+import User from "../../../../../../server/models/User";
+import { useAuthContext } from "../../../../hooks/useAuthContext";
 
 const Header = ({ selectedNote }) => {
   const { favoriteNote, unfavoriteNote } = useNote();
-
+  const { user } = useAuthContext();
   const [editMenuPosition, setEditMenuPosition] = useState(null);
   const [showEditMenu, setShowEditMenu] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [shareModalPosition, setShareModalPosition] = useState(null); // State for ShareModal position
+  const [shareModalPosition, setShareModalPosition] = useState(null);
 
   const handleToggleFavorite = async () => {
     if (selectedNote.isFavorite) {
@@ -42,12 +44,13 @@ const Header = ({ selectedNote }) => {
   const handleOpenShareModal = (e) => {
     e.preventDefault();
     const elementRect = e.currentTarget.getBoundingClientRect();
-    const modalTop = elementRect.bottom + 4; // Position below the Share button
-    const modalLeft = Math.min(elementRect.left, window.innerWidth - 300); // Align to the left of the Share button, ensuring it doesn't overflow
+    const modalTop = elementRect.bottom + 4;
+    const modalLeft = Math.min(elementRect.left, window.innerWidth - 300);
     setShareModalPosition({ top: modalTop, left: modalLeft });
     setShowShareModal(true);
+    // Log the selected note to ensure it's defined
+    console.log("Opening share modal with note:", selectedNote);
   };
-
   return (
     <>
       {selectedNote && (
@@ -72,11 +75,21 @@ const Header = ({ selectedNote }) => {
         <Modal
           show={showShareModal}
           close={() => setShowShareModal(false)}
-          modalPosition={shareModalPosition} // Pass the position state here
+          modalPosition={shareModalPosition}
           modalContainerClassName={styles.share_modal_container}
           modalClassName={styles.share_modal}
+          style={{
+            top: `${shareModalPosition?.top}px`,
+            left: `${shareModalPosition?.left}px`,
+          }}
         >
-          <ShareModal close={() => setShowShareModal(false)} />
+          {/* Pass note details to ShareModal */}
+          <ShareModal
+            close={() => setShowShareModal(false)}
+            noteId={selectedNote.id}
+            noteTitle={selectedNote.title}
+            noteContent={selectedNote.content}
+          />
         </Modal>
       )}
 
