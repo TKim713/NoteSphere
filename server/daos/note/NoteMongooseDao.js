@@ -1,6 +1,5 @@
 import MongooseClass from '../base/MongooseClass.js';
 import Note from '../../models/Note.js';
-import UserPermission from '../../models/UserPermission.js';
 import NoteListDao from '../noteList/index.js';
 class NoteMongooseDao extends MongooseClass {
   constructor() {
@@ -11,24 +10,16 @@ class NoteMongooseDao extends MongooseClass {
     return await this.collection.findOne({ id });
   }
 
+  async fetchNotesByUserId(userId) {
+    return await this.collection.find({ userId });
+  }
+
   async fetchNoteContentById(id) {
     return await this.collection.findOne({ id }).select('content userId');
   }
 
   async fetchByTitle(title) {
     return await this.collection.findOne({ title });
-  }
-
-  async assignPermission(noteId, userId, permission) {
-    const existingPermission = await UserPermission.findOne({ noteId, userId });
-
-    if (existingPermission) {
-        existingPermission.permission = permission;
-        await existingPermission.save();
-    } else {
-        const newPermission = new UserPermission({ userId, noteId, permission });
-        await newPermission.save();
-    }
   }
 
   // TODO: use session or cascading middleware

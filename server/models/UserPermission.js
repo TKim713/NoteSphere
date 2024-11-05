@@ -6,6 +6,4 @@ const userPermissionSchema = new mongoose.Schema({
     permission: { type: String, enum: ['View', 'Edit', 'Comment', 'All'], required: true },
 }, { timestamps: true });
 
-const UserPermission = mongoose.model('UserPermission', userPermissionSchema);
-
-export default UserPermission;
+export default mongoose.model('UserPermission', userPermissionSchema);
