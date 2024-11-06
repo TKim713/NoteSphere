@@ -96,51 +96,55 @@ export const useNote = () => {
     });
   };
 
-  const saveSelectedChanges = async ({ id, title, emoji, content }) => {
+  const saveSelectedChanges = async ({ id, title, emoji, content, coverImage }) => {
     setError(null);
-
+  
     try {
       const updatedNotes = [...notes];
       const updatedFavoriteNotes = [...favoriteNotes];
       const currentSelectedNote = selectedNote;
-
+  
       delete currentSelectedNote.content;
+      delete currentSelectedNote.coverImage;
       const existingNormalNoteIndex = notes.findIndex((note) => note.id === id);
       updatedNotes.splice(existingNormalNoteIndex, 1, currentSelectedNote);
-
+  
       const existingFavoriteNoteIndex = favoriteNotes.findIndex(
         (note) => note.id === id
       );
-
+  
       if (existingFavoriteNoteIndex >= 0) {
         updatedFavoriteNotes.splice(existingFavoriteNoteIndex, 1, {
           id: currentSelectedNote.id,
           title: currentSelectedNote.title,
           emoji: currentSelectedNote.emoji,
+          coverImage,
         });
       }
-
+  
       dispatch({
         type: 'SAVE_SELECTED_CHANGES',
         payload: {
           notes: updatedNotes,
           favoriteNotes: updatedFavoriteNotes,
           content,
+          coverImage,
         },
       });
-
+  
       const config = {
         headers: {
           'Content-Type': 'application/json',
         },
       };
-
+  
       const body = JSON.stringify({
         title,
         emoji,
         content,
+        coverImage,
       });
-
+  
       await axios.put(
         `${import.meta.env.VITE_API_URL}/api/notes/${id}`,
         body,
@@ -150,7 +154,7 @@ export const useNote = () => {
       console.error(err.message);
       setError(err);
     }
-  };
+  };  
 
   const setEditingValue = (payload) => {
     dispatch({ type: 'SET_EDITING_VALUE', payload });
