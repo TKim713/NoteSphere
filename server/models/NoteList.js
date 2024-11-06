@@ -18,6 +18,11 @@ const noteListSchema = new mongoose.Schema({
       ref: 'Note',
     },
   ],
+  sharedListOrder: [
+    { type: mongoose.Schema.Types.ObjectId,
+      ref: 'Note' 
+    }
+  ],
 });
 
 export default mongoose.model('NoteList', noteListSchema);

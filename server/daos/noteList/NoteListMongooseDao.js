@@ -17,6 +17,10 @@ class NoteListMongooseDao extends MongooseClass {
         path: 'normalListOrder',
         select: '-content -userId',
       })
+      .populate({
+        path: 'sharedListOrder',
+        select: '-content -userId',
+      })
       .lean();
   }
 
@@ -45,6 +49,13 @@ class NoteListMongooseDao extends MongooseClass {
     noteList.save();
   }
 
+  async addNoteToSharedList(userId, noteId) {
+    return await this.collection.findOneAndUpdate(
+      { userId },
+      { $push: { sharedListOrder: noteId } }
+    );
+  }
+
   async favoriteNote(userId, noteId) {
     const noteList = await this.collection
       .findOne({ userId })
@@ -55,6 +66,10 @@ class NoteListMongooseDao extends MongooseClass {
       .populate({
         path: 'favoriteListOrder',
         select: 'id',
+      })
+      .populate({
+        path: 'sharedListOrder',
+        select: '-content -userId',
       });
 
     const { _id } = noteList.normalListOrder.find((note) => note.id === noteId);
@@ -83,6 +98,13 @@ class NoteListMongooseDao extends MongooseClass {
     return await this.collection.findOneAndUpdate(
       { userId },
       { $pull: { normalListOrder: noteId, favoriteListOrder: noteId } }
+    );
+  }
+
+  async removeNoteFromSharedList(userId, noteId) {
+    return await this.collection.findOneAndUpdate(
+      { userId },
+      { $pull: { sharedListOrder: noteId } }
     );
   }
 
@@ -125,6 +147,20 @@ class NoteListMongooseDao extends MongooseClass {
       noteList.favoriteListOrder.find((note) => note.id === id)
     );
     noteList.favoriteListOrder = updatedList;
+
+    await noteList.save();
+  }
+
+  async sortSharedList(userId, newOrder) {
+    const noteList = await this.collection.findOne({ userId }).populate({
+      path: 'sharedListOrder',
+      select: 'id',
+    });
+
+    const updatedList = newOrder.map((id) =>
+      noteList.sharedListOrder.find((note) => note.id === id)
+    );
+    noteList.sharedListOrder = updatedList;
 
     await noteList.save();
   }

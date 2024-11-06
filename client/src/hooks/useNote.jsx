@@ -102,10 +102,9 @@ export const useNote = () => {
     try {
       const updatedNotes = [...notes];
       const updatedFavoriteNotes = [...favoriteNotes];
-      const currentSelectedNote = selectedNote;
+      const currentSelectedNote = { ...selectedNote, coverImage }; // Giữ lại coverImage ở đây
   
-      delete currentSelectedNote.content;
-      delete currentSelectedNote.coverImage;
+      // Cập nhật lại currentSelectedNote
       const existingNormalNoteIndex = notes.findIndex((note) => note.id === id);
       updatedNotes.splice(existingNormalNoteIndex, 1, currentSelectedNote);
   
@@ -128,7 +127,7 @@ export const useNote = () => {
           notes: updatedNotes,
           favoriteNotes: updatedFavoriteNotes,
           content,
-          coverImage,
+          coverImage, // Đảm bảo coverImage cũng có mặt ở payload
         },
       });
   
@@ -154,7 +153,7 @@ export const useNote = () => {
       console.error(err.message);
       setError(err);
     }
-  };  
+  };
 
   const setEditingValue = (payload) => {
     dispatch({ type: 'SET_EDITING_VALUE', payload });

@@ -25,6 +25,10 @@ export const fetchUserNotes = async (userId) => {
     );
   }
 
+  for (let i = 0; i < notes.sharedListOrder.length; i++) {
+    notes.sharedListOrder[i].isShared = true;
+  }
+
   return notes;
 };
 
@@ -114,4 +118,8 @@ export const sortNormalList = async (userId, newOrder) => {
 
 export const sortFavoriteList = async (userId, newOrder) => {
   await NoteListDao.sortFavoriteList(userId, newOrder);
+};
+
+export const sortSharedList = async (userId, newOrder) => {
+  await NoteListDao.sortSharedList(userId, newOrder);
 };
