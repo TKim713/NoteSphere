@@ -19,7 +19,7 @@ class NoteListMongooseDao extends MongooseClass {
       })
       .populate({
         path: 'sharedListOrder',
-        select: '-content -userId',
+        select: '-content',
       })
       .lean();
   }
