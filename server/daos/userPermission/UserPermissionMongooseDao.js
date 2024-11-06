@@ -17,6 +17,21 @@ class UserPermissionMongooseDao extends MongooseClass {
         await newPermission.save();
     }
   }
+
+  async checkPermission (userId, noteId, requiredPermission) {
+    const permission = await UserPermission.findOne({ userId, noteId });
+    if (!permission) {
+      throw new Error('No permission found for this note');
+    }
+  
+    const permissionsHierarchy = ['View', 'Comment', 'Edit', 'All'];
+    const userPermissionIndex = permissionsHierarchy.indexOf(permission.permission);
+    const requiredPermissionIndex = permissionsHierarchy.indexOf(requiredPermission);
+  
+    if (userPermissionIndex < requiredPermissionIndex) {
+      throw new Error('Insufficient permission for this action');
+    }
+  }
 }
   
 export default UserPermissionMongooseDao;

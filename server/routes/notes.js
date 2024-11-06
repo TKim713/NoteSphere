@@ -28,6 +28,5 @@ router.put('/:noteId/unfavorite', checkAuth, removeNoteFromFavorites);
 router.post('/', checkAuth, createNote);
 router.post('/:noteId/duplicate', checkAuth, createDuplicateNote);
 router.delete('/:noteId', checkAuth, deleteNote);
-// router.post('/share', checkAuth, shareNote);
 
 export default router;
