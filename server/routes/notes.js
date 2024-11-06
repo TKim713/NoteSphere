@@ -14,6 +14,7 @@ import {
 } from '../controllers/noteController.js';
 
 import { checkAuth } from '../middlewares/checkAuth.js';
+import upload from '../middlewares/fileUploads.js';
 
 const router = Router();
 
@@ -21,7 +22,7 @@ router.get('/', checkAuth, getUserNotes);
 router.get('/:noteId', checkAuth, getNote);
 router.put('/sortNormalList', checkAuth, reorderNormalList);
 router.put('/sortFavoriteList', checkAuth, reorderFavoriteList);
-router.put('/:noteId', checkAuth, editNote);
+router.put('/:noteId', checkAuth, upload.single('coverImage'), editNote);
 router.put('/:noteId/favorite', checkAuth, addNoteToFavorites);
 router.put('/:noteId/unfavorite', checkAuth, removeNoteFromFavorites);
 router.post('/', checkAuth, createNote);

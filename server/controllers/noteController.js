@@ -47,8 +47,12 @@ export const createNote = async (req, res, next) => {
 export const editNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
+    const userId = req.user.id;
+    const noteDetails = req.body;
+    const file = req.file ? req.file : null;
 
-    await saveChangesToNote(req.user.id, noteId, req.body);
+    await saveChangesToNote(userId, noteId, noteDetails, file);
+
     res.json({ message: 'Success' });
   } catch (err) {
     return next(err);

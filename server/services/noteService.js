@@ -78,9 +78,18 @@ export const duplicateNote = async ({
   });
 };
 
-export const saveChangesToNote = async (userId, noteId, noteDetails) => {
+export const saveChangesToNote = async (userId, noteId, noteDetails, file) => {
   await checkForExistingNoteAndPermission(userId, noteId);
-  return await NoteDao.updateNote(noteId, noteDetails);
+  let coverImageUrl = null;
+  if (file) {
+    const uploadResult = await NoteDao.uploadImageToCloudinary(file);
+    coverImageUrl = uploadResult.secure_url;
+  }
+
+  const updatedNoteDetails = coverImageUrl
+    ? { ...noteDetails, coverImage: coverImageUrl }
+    : { ...noteDetails };
+  return await NoteDao.updateNote(noteId, updatedNoteDetails);
 };
 
 export const favoriteNote = async (userId, noteId) => {
