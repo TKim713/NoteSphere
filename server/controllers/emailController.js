@@ -2,25 +2,29 @@ import CustomError from '../models/CustomError.js';
 import { sendEmail, assignPermission } from '../services/emailService.js';
 
 export const shareNote = async (req, res, next) => {
-    const { email, noteTitle, noteContent, senderName, permission } = req.body;
+    const { email, noteId, noteTitle, senderName, permission } = req.body;
 
-    if (!email || !noteTitle || !noteContent || !senderName || !permission) {
+    if (!email || !noteId || !noteTitle || !senderName || !permission) {
         return next(new CustomError('All fields are required', 400));
     }
 
-    const subject = `A note has been shared with you by ${senderName}`;
-    const text = `Hi,\n\n${senderName} has shared a note with you:\n\nTitle: ${noteTitle}\n\nContent:\n${noteContent}\n\nBest regards,\nNoteSphere Team`;
+    const noteUrl = `http://localhost:5173/notes/${noteId}?permission=${permission}`;
+
+    const subject = `${senderName} has invited you to view a note`;
+    const text = `Take a look at ${noteTitle} (note name).
+                    Accept ${senderName}'s invite to view ${noteTitle}:${noteUrl}`;
+
     const html = `
-        <h2>${senderName} has shared a note with you</h2>
-        <p><strong>Title:</strong> ${noteTitle}</p>
-        <p>${noteContent}</p>
+        <p>Take a look at <strong>${noteTitle}</strong> (note name).</p>
+        <p>Accept ${senderName}'s invite to view <strong>${noteTitle}</strong>:</p>
+        <p><a href="${noteUrl}">Click here to view the note</a></p>
         <p>Best regards,<br>NoteSphere Team</p>
     `;
 
     try {
         // Assign permission to the user for the note
-        await assignPermission(email, noteTitle, permission);
-        
+        await assignPermission(email, noteId, permission);
+
         // Send the sharing email
         await sendEmail(email, subject, text, html);
         res.status(200).json({ message: 'Email sent successfully and permission assigned' });

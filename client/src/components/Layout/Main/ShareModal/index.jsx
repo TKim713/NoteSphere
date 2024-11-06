@@ -7,8 +7,11 @@ const ShareModal = ({ close, noteId, noteTitle, noteContent, token }) => {
   const [email, setEmail] = useState("");
   const [permission, setPermission] = useState("View"); // Default permission value
   const emailInputRef = useRef(null);
-  const [senderName, setSenderName] = useState("You");
-
+  const [senderName, setSenderName] = useState("");
+  const {
+    user: { name },
+  } = useAuthContext();
+  console.log("name", name)
   // Access the API URL from the environment variable
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -27,10 +30,10 @@ const ShareModal = ({ close, noteId, noteTitle, noteContent, token }) => {
 
   const handleShare = async () => {
     const shareData = {
+      noteId,
       noteTitle,
-      noteContent,
       email,
-      senderName,
+      senderName : name,
       permission,
     };
 
@@ -106,7 +109,6 @@ const ShareModal = ({ close, noteId, noteTitle, noteContent, token }) => {
             >
               <option value="View">View</option>
               <option value="Edit">Edit</option>
-              <option value="Comment">Comment</option>
               <option value="All">All</option>
             </select>
           </div>

@@ -1,5 +1,6 @@
 import UserDao from '../daos/user/index.js';
 import NoteDao from '../daos/note/index.js';
+import UserPermissionDao from '../daos/userPermission/index.js';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -24,17 +25,17 @@ export const sendEmail = async (to, subject, text, html) => {
   await transporter.sendMail(mailOptions);
 };
 
-export const assignPermission = async (email, noteTitle, permission) => {
+export const assignPermission = async (email, noteId, permission) => {
 
     try {
         const user = await UserDao.fetchByEmail(email);
-        const note = await NoteDao.fetchByTitle(noteTitle);
+        const note = await NoteDao.fetchNoteById(noteId);
     
         if (!user || !note) {
           throw new Error('User or note not found');
         }
     
-        await NoteDao.assignPermission(note.id, user.id, permission);
+        await UserPermissionDao.assignPermission(note.id, user.id, permission);
       } catch (error) {
         console.error("Error in assignPermission:", error);
         throw error;
