@@ -26,18 +26,18 @@ export const sendEmail = async (to, subject, text, html) => {
   await transporter.sendMail(mailOptions);
 };
 
-export const assignPermission = async (email, noteId, permission) => {
-
+export const assignPermission = async (email, noteId, permission, senderName) => {
   try {
     const user = await UserDao.fetchByEmail(email);
     const note = await NoteDao.fetchNoteById(noteId);
-    
+
     if (!user || !note) {
       throw new Error('User or note not found');
     }
-    
+
     await UserPermissionDao.assignPermission(note.id, user.id, permission);
-    await NoteListDao.addNoteToSharedList(user.id, note._id);
+
+    await NoteListDao.addNoteToSharedList(user.id, note._id, senderName);
   } catch (error) {
     console.error("Error in assignPermission:", error);
     throw error;

@@ -19,8 +19,9 @@ const noteListSchema = new mongoose.Schema({
     },
   ],
   sharedListOrder: [
-    { type: mongoose.Schema.Types.ObjectId,
-      ref: 'Note' 
+    { 
+      note: { type: mongoose.Types.ObjectId, ref: 'Note' },
+      sharedBy: { type: String },
     }
   ],
 });

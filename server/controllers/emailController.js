@@ -4,6 +4,8 @@ import { sendEmail, assignPermission } from '../services/emailService.js';
 export const shareNote = async (req, res, next) => {
     const { email, noteId, noteTitle, senderName, permission } = req.body;
 
+    const sharedByUserId = req.user?.id;
+
     if (!email || !noteId || !noteTitle || !senderName || !permission) {
         return next(new CustomError('All fields are required', 400));
     }
@@ -23,7 +25,7 @@ export const shareNote = async (req, res, next) => {
 
     try {
         // Assign permission to the user for the note
-        await assignPermission(email, noteId, permission);
+        await assignPermission(email, noteId, permission, senderName);
 
         // Send the sharing email
         await sendEmail(email, subject, text, html);
