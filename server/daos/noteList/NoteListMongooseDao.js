@@ -126,33 +126,46 @@ class NoteListMongooseDao extends MongooseClass {
   //   );
   // }
 
-  async sortNormalList(userId, newOrder) {
+  async sortNormalList(userId) {
     const noteList = await this.collection.findOne({ userId }).populate({
       path: 'normalListOrder',
-      select: 'id',
+      select: 'title id',
     });
 
-    const updatedList = newOrder.map((id) =>
-      noteList.normalListOrder.find((note) => note.id === id)
-    );
+    if (!noteList || !noteList.normalListOrder) {
+      throw new Error("User's note list or normal list order is missing.");
+    }
 
-    noteList.normalListOrder = updatedList;
+    noteList.normalListOrder.sort((a, b) => {
+      const titleA = a.title || '';
+      const titleB = b.title || '';
+      return titleA.localeCompare(titleB);
+    });
 
     await noteList.save();
-  }
 
-  async sortFavoriteList(userId, newOrder) {
+    return noteList.normalListOrder;
+}  
+
+  async sortFavoriteList(userId) {
     const noteList = await this.collection.findOne({ userId }).populate({
       path: 'favoriteListOrder',
-      select: 'id',
+      select: 'title id',
     });
 
-    const updatedList = newOrder.map((id) =>
-      noteList.favoriteListOrder.find((note) => note.id === id)
-    );
-    noteList.favoriteListOrder = updatedList;
+    if (!noteList || !noteList.favoriteListOrder) {
+      throw new Error("User's note list or favorite list order is missing.");
+    }
+
+    noteList.favoriteListOrder.sort((a, b) => {
+      const titleA = a.title || '';
+      const titleB = b.title || '';
+      return titleA.localeCompare(titleB);
+    });
 
     await noteList.save();
+
+    return noteList.favoriteListOrder;
   }
 
   async sortSharedList(userId, newOrder) {
