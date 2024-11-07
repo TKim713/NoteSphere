@@ -112,12 +112,12 @@ export const removeNote = async (userId, noteId) => {
   return deletedNote;
 };
 
-export const sortNormalList = async (userId, newOrder) => {
-  await NoteListDao.sortNormalList(userId, newOrder);
+export const sortNormalList = async (userId) => {
+  return await NoteListDao.sortNormalList(userId);
 };
 
-export const sortFavoriteList = async (userId, newOrder) => {
-  await NoteListDao.sortFavoriteList(userId, newOrder);
+export const sortFavoriteList = async (userId) => {
+  return await NoteListDao.sortFavoriteList(userId);
 };
 
 export const sortSharedList = async (userId, newOrder) => {
