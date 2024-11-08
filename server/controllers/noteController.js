@@ -25,7 +25,10 @@ export const getNote = async (req, res, next) => {
 
 export const getUserNotes = async (req, res, next) => {
   try {
-    const notes = await fetchUserNotes(req.user.id);
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = parseInt(req.query.skip, 10) || 0;
+
+    const notes = await fetchUserNotes(req.user.id, { limit, skip });
     res.json(notes);
   } catch (err) {
     return next(err);
