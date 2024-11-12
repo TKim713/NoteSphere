@@ -17,6 +17,10 @@ class NoteListMongooseDao extends MongooseClass {
         path: 'normalListOrder',
         select: '-content -userId',
       })
+      .populate({
+        path: 'sharedListOrder.note',
+        select: '-content -userId',
+      })
       .lean();
   }
 
@@ -53,6 +57,13 @@ class NoteListMongooseDao extends MongooseClass {
     noteList.save();
   }
 
+  async addNoteToSharedList(userId, noteId, senderName) {
+    return await this.collection.findOneAndUpdate(
+      { userId },
+      { $push: { sharedListOrder: { note: noteId, sharedBy: senderName } } }
+    );
+  }
+
   async favoriteNote(userId, noteId) {
     const noteList = await this.collection
       .findOne({ userId })
@@ -63,7 +74,15 @@ class NoteListMongooseDao extends MongooseClass {
       .populate({
         path: 'favoriteListOrder',
         select: 'id',
-      });
+      })
+      .populate({
+        path: 'sharedListOrder.note',
+        select: '-content -userId',
+      })
+      .populate({
+        path: 'sharedListOrder.sharedBy',
+        select: 'name email',
+      })
 
     const { _id } = noteList.normalListOrder.find((note) => note.id === noteId);
 
@@ -94,6 +113,13 @@ class NoteListMongooseDao extends MongooseClass {
     );
   }
 
+  async removeNoteFromSharedList(userId, noteId) {
+    return await this.collection.findOneAndUpdate(
+      { userId },
+      { $pull: { sharedListOrder: noteId } }
+    );
+  }
+
   // async deleteFavoriteNote(userId, noteId) {
   //   return await this.collection.findOneAndUpdate(
   //     { userId },
@@ -108,31 +134,58 @@ class NoteListMongooseDao extends MongooseClass {
   //   );
   // }
 
-  async sortNormalList(userId, newOrder) {
+  async sortNormalList(userId) {
     const noteList = await this.collection.findOne({ userId }).populate({
       path: 'normalListOrder',
-      select: 'id',
+      select: 'title id',
     });
 
-    const updatedList = newOrder.map((id) =>
-      noteList.normalListOrder.find((note) => note.id === id)
-    );
+    if (!noteList || !noteList.normalListOrder) {
+      throw new Error("User's note list or normal list order is missing.");
+    }
 
-    noteList.normalListOrder = updatedList;
+    noteList.normalListOrder.sort((a, b) => {
+      const titleA = a.title || '';
+      const titleB = b.title || '';
+      return titleA.localeCompare(titleB);
+    });
 
     await noteList.save();
-  }
 
-  async sortFavoriteList(userId, newOrder) {
+    return noteList.normalListOrder;
+}  
+
+  async sortFavoriteList(userId) {
     const noteList = await this.collection.findOne({ userId }).populate({
       path: 'favoriteListOrder',
+      select: 'title id',
+    });
+
+    if (!noteList || !noteList.favoriteListOrder) {
+      throw new Error("User's note list or favorite list order is missing.");
+    }
+
+    noteList.favoriteListOrder.sort((a, b) => {
+      const titleA = a.title || '';
+      const titleB = b.title || '';
+      return titleA.localeCompare(titleB);
+    });
+
+    await noteList.save();
+
+    return noteList.favoriteListOrder;
+  }
+
+  async sortSharedList(userId, newOrder) {
+    const noteList = await this.collection.findOne({ userId }).populate({
+      path: 'sharedListOrder',
       select: 'id',
     });
 
     const updatedList = newOrder.map((id) =>
-      noteList.favoriteListOrder.find((note) => note.id === id)
+      noteList.sharedListOrder.find((note) => note.id === id)
     );
-    noteList.favoriteListOrder = updatedList;
+    noteList.sharedListOrder = updatedList;
 
     await noteList.save();
   }

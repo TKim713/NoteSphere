@@ -25,6 +25,10 @@ export const fetchUserNotes = async (userId) => {
     );
   }
 
+  for (let i = 0; i < notes.sharedListOrder.length; i++) {
+    notes.sharedListOrder[i].isShared = true;
+  }
+
   return notes;
 };
 
@@ -78,9 +82,18 @@ export const duplicateNote = async ({
   });
 };
 
-export const saveChangesToNote = async (userId, noteId, noteDetails) => {
+export const saveChangesToNote = async (userId, noteId, noteDetails, file) => {
   await checkForExistingNoteAndPermission(userId, noteId);
-  return await NoteDao.updateNote(noteId, noteDetails);
+  let coverImageUrl = null;
+  if (file) {
+    const uploadResult = await NoteDao.uploadImageToCloudinary(file);
+    coverImageUrl = uploadResult.secure_url;
+  }
+
+  const updatedNoteDetails = coverImageUrl
+    ? { ...noteDetails, coverImage: coverImageUrl }
+    : { ...noteDetails };
+  return await NoteDao.updateNote(noteId, updatedNoteDetails);
 };
 
 export const favoriteNote = async (userId, noteId) => {
@@ -99,10 +112,14 @@ export const removeNote = async (userId, noteId) => {
   return deletedNote;
 };
 
-export const sortNormalList = async (userId, newOrder) => {
-  await NoteListDao.sortNormalList(userId, newOrder);
+export const sortNormalList = async (userId) => {
+  return await NoteListDao.sortNormalList(userId);
 };
 
-export const sortFavoriteList = async (userId, newOrder) => {
-  await NoteListDao.sortFavoriteList(userId, newOrder);
+export const sortFavoriteList = async (userId) => {
+  return await NoteListDao.sortFavoriteList(userId);
+};
+
+export const sortSharedList = async (userId, newOrder) => {
+  await NoteListDao.sortSharedList(userId, newOrder);
 };

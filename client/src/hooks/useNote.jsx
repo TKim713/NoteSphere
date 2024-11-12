@@ -107,54 +107,57 @@ export const useNote = () => {
     }
   };
 
-  const saveSelectedChanges = async ({ id, title, emoji, content }) => {
+  const saveSelectedChanges = async ({ id, title, emoji, content, coverImage }) => {
     setError(null);
-
+  
     try {
       const updatedNotes = [...notes];
       const updatedFavoriteNotes = [...favoriteNotes];
-      const currentSelectedNote = selectedNote;
-
+      const currentSelectedNote = { ...selectedNote, coverImage }; // Giữ lại coverImage ở đây
+  
       // We are joining the content blocks into a string to send to the backend
       const contentString = content.join('\n');
-
       delete currentSelectedNote.content;  // Remove content to avoid sending unnecessary data
+      // Cập nhật lại currentSelectedNote
       const existingNormalNoteIndex = notes.findIndex((note) => note.id === id);
       updatedNotes.splice(existingNormalNoteIndex, 1, currentSelectedNote);
-
+  
       const existingFavoriteNoteIndex = favoriteNotes.findIndex(
         (note) => note.id === id
       );
-
+  
       if (existingFavoriteNoteIndex >= 0) {
         updatedFavoriteNotes.splice(existingFavoriteNoteIndex, 1, {
           id: currentSelectedNote.id,
           title: currentSelectedNote.title,
           emoji: currentSelectedNote.emoji,
+          coverImage,
         });
       }
-
+  
       dispatch({
         type: 'SAVE_SELECTED_CHANGES',
         payload: {
           notes: updatedNotes,
           favoriteNotes: updatedFavoriteNotes,
           content,
+          coverImage, // Đảm bảo coverImage cũng có mặt ở payload
         },
       });
-
+  
       const config = {
         headers: {
           'Content-Type': 'application/json',
         },
       };
-
+  
       const body = JSON.stringify({
         title,
         emoji,
         content: contentString,  // Send the content as a string to the backend
+        coverImage,
       });
-
+  
       await axios.put(
         `${import.meta.env.VITE_API_URL}/api/notes/${id}`,
         body,

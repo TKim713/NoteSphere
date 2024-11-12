@@ -1,7 +1,7 @@
 import MongooseClass from '../base/MongooseClass.js';
 import Note from '../../models/Note.js';
-
 import NoteListDao from '../noteList/index.js';
+import cloudinary from '../../middlewares/cloudinaryConfig.js';
 class NoteMongooseDao extends MongooseClass {
   constructor() {
     super(Note);
@@ -11,8 +11,16 @@ class NoteMongooseDao extends MongooseClass {
     return await this.collection.findOne({ id });
   }
 
+  async fetchNotesByUserId(userId) {
+    return await this.collection.find({ userId });
+  }
+
   async fetchNoteContentById(id) {
     return await this.collection.findOne({ id }).select('content userId');
+  }
+
+  async fetchByTitle(title) {
+    return await this.collection.findOne({ title });
   }
 
   // TODO: use session or cascading middleware
@@ -45,6 +53,21 @@ class NoteMongooseDao extends MongooseClass {
     const { _id } = await this.collection.findOneAndDelete({ id: noteId });
 
     await NoteListDao.deleteNote(userId, _id);
+  }
+
+  async uploadImageToCloudinary(file) {
+    if (!file) {
+      throw new Error('No file provided for upload.');
+    }
+
+    try {
+      const uploadResult = await cloudinary.uploader.upload(file.path || file.buffer, {
+        resource_type: 'auto'
+      });
+      return uploadResult;
+    } catch (err) {
+      throw new Error('Error uploading image to Cloudinary: ' + err.message);
+    }
   }
 }
 

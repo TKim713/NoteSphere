@@ -47,8 +47,12 @@ export const createNote = async (req, res, next) => {
 export const editNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
+    const userId = req.user.id;
+    const noteDetails = req.body;
+    const file = req.file ? req.file : null;
 
-    await saveChangesToNote(req.user.id, noteId, req.body);
+    await saveChangesToNote(userId, noteId, noteDetails, file);
+
     res.json({ message: 'Success' });
   } catch (err) {
     return next(err);
@@ -110,10 +114,8 @@ export const deleteNote = async (req, res, next) => {
 
 export const reorderNormalList = async (req, res, next) => {
   try {
-    const { newOrder } = req.body;
-
-    await sortNormalList(req.user.id, newOrder);
-    res.json({ message: 'Success' });
+    const sortedNotes = await sortNormalList(req.user.id);
+    res.json({ message: 'Success', sortedNotes });
   } catch (err) {
     return next(err);
   }
@@ -121,10 +123,8 @@ export const reorderNormalList = async (req, res, next) => {
 
 export const reorderFavoriteList = async (req, res, next) => {
   try {
-    const { newOrder } = req.body;
-
-    await sortFavoriteList(req.user.id, newOrder);
-    res.json({ message: 'Success' });
+    const sortedFavoriteNotes = await sortFavoriteList(req.user.id);
+    res.json({ message: 'Success', sortedFavoriteNotes });
   } catch (err) {
     return next(err);
   }

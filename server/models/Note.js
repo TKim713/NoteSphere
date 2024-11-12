@@ -12,6 +12,10 @@ const noteSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    coverImage: {
+      type: String,
+      default: '',
+    },
     // _id: {
     //   type: String,
     //   default: function () {
