@@ -15,7 +15,7 @@ export const useNote = () => {
 
   const createNote = async () => {
     setIsLoading(true);
-  
+
     try {
       const updatedNotes = [...notes];
       const newNote = {
@@ -25,86 +25,75 @@ export const useNote = () => {
         isFavorite: false,
         index: notes.length,
         favoriteIndex: null,
-        content: [''], // Start with an empty block
       };
       updatedNotes.push(newNote);
-  
+
       dispatch({ type: 'UPDATE_NORMAL_NOTES', payload: updatedNotes });
-  
+
       const config = {
         headers: {
           'Content-Type': 'application/json',
         },
       };
-  
+
       const body = JSON.stringify({
         id: newNote.id,
-        content: newNote.content, // Send content array to the backend
       });
-  
+
       await axios.post(
         `${import.meta.env.VITE_API_URL}/api/notes/`,
         body,
         config
       );
-  
+
       setIsLoading(false);
     } catch (err) {
       console.error(err.message);
       setIsLoading(false);
     }
-  };  
+  };
 
   const setSelectedNote = async (id) => {
     setIsLoading(true);
     try {
       const selectedNote = notes.find((note) => note.id === id);
-  
+
       dispatch({
         type: 'SET_SELECTED_HEADER',
         payload: { ...selectedNote, content: null },
       });
-  
+
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/notes/${id}`
       );
-  
-      const content = res.data.content || ""; // Default to an empty string
-  
-      // Ensure that content is processed as a string
-      const contentBlocks = typeof content === 'string' ? content.split('\n') : [];
-  
-      dispatch({ type: 'SET_SELECTED_CONTENT', payload: contentBlocks });
-  
+
+      dispatch({ type: 'SET_SELECTED_CONTENT', payload: res.data.content });
+
       setIsLoading(false);
     } catch (err) {
       console.error(err.message);
-      if (err.response?.status === 404) {
+      if (err.response.status === 404) {
         const updatedNotes = [...notes];
+
         const existingNoteIndex = notes.findIndex((note) => note.id === id);
+
         updatedNotes.splice(existingNoteIndex, 1);
-        dispatch({ type: 'NOTE_NOT_FOUND', payload: updatedNotes });
+
+        dispatch({
+          type: 'NOTE_NOT_FOUND',
+          payload: updatedNotes,
+        });
       }
+
       setIsLoading(false);
     }
-  };  
+  };
 
-  const editSelectedNote = (key, value, blockIndex = null) => {
-    // If we're editing a content block, update the specific block in the content array
-    if (key === 'content' && blockIndex !== null) {
-      const updatedContent = [...selectedNote.content];
-      updatedContent[blockIndex] = value;  // Update the specific block
-      dispatch({
-        type: 'EDIT_SELECTED_NOTE',
-        payload: { key, value: updatedContent },
-      });
-    } else {
-      // Otherwise, update the field (title, emoji, etc.)
-      dispatch({
-        type: 'EDIT_SELECTED_NOTE',
-        payload: { key, value },
-      });
-    }
+  const editSelectedNote = (key, value) => {
+    dispatch({
+      type: 'EDIT_SELECTED_NOTE',
+      payload: { key, value },
+    });
   };
 
   const saveSelectedChanges = async ({ id, title, emoji, content, coverImage }) => {
@@ -115,9 +104,6 @@ export const useNote = () => {
       const updatedFavoriteNotes = [...favoriteNotes];
       const currentSelectedNote = { ...selectedNote, coverImage }; // Giữ lại coverImage ở đây
   
-      // We are joining the content blocks into a string to send to the backend
-      const contentString = content.join('\n');
-      delete currentSelectedNote.content;  // Remove content to avoid sending unnecessary data
       // Cập nhật lại currentSelectedNote
       const existingNormalNoteIndex = notes.findIndex((note) => note.id === id);
       updatedNotes.splice(existingNormalNoteIndex, 1, currentSelectedNote);
@@ -154,7 +140,7 @@ export const useNote = () => {
       const body = JSON.stringify({
         title,
         emoji,
-        content: contentString,  // Send the content as a string to the backend
+        content,
         coverImage,
       });
   

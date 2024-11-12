@@ -19,18 +19,23 @@ const SelectedNote = () => {
   const contentRef = useRef();
   const isFirstRender = useRef(true);
 
-  const { id, title, emoji, content, coverImage } = selectedNote;
-  //const { id, title, emoji, content = '' } = selectedNote || {}; // Handle undefined selectedNote
+  //const { id, title, emoji, content, coverImage } = selectedNote;
+  const { id, title, emoji, content = '', coverImage } = selectedNote || {}; // Handle undefined selectedNote
 
   // Initialize content as an array of blocks
+  // const [contentBlocks, setContentBlocks] = useState(
+  //   typeof content === 'string' ? content.split('\n') : ['']
+  // );
+
   const [contentBlocks, setContentBlocks] = useState(
-    typeof content === 'string' ? content.split('\n') : ['']
+    Array.isArray(content) ? content : [''] // Check if content is an array
   );
+  
 
   const [showPicker, setShowPicker] = useState(false);
   const [newCoverImage, setNewCoverImage] = useState(null); // State for new cover image
-  //const [showPopup, setShowPopup] = useState({ show: false, index: null }); // State for the popup menu
-  //const [blockType, setBlockType] = useState('normal'); // Default to normal block
+  const [showPopup, setShowPopup] = useState({ show: false, index: null }); // State for the popup menu
+  const [blockType, setBlockType] = useState('normal'); // Default to normal block
 
   const handleEmojiSelect = (e) => {
     editSelectedNote("emoji", e.native);
@@ -62,12 +67,24 @@ const SelectedNote = () => {
     }
   };
 
+  // const handleFormChange = useCallback((e, index) => {
+  //   const newContentBlocks = [...contentBlocks];
+  //   newContentBlocks[index] = e.target.value; // Update the specific block
+  //   setContentBlocks(newContentBlocks);
+    
+  //   if (e.target.name == 'content') {
+  //     editSelectedNote(e.target.name, newContentBlocks.join('\n')); // Join blocks into content string
+  //   }
+
+  //   editSelectedNote(e.target.name, e.target.value); // Join blocks into content string
+  // }, [contentBlocks]);
   const handleFormChange = useCallback((e, index) => {
     const newContentBlocks = [...contentBlocks];
     newContentBlocks[index] = e.target.value; // Update the specific block
     setContentBlocks(newContentBlocks);
-
-    editSelectedNote('content', newContentBlocks.join('\n')); // Join blocks into content string
+    
+    // Update selected note content as an array
+    editSelectedNote('content', newContentBlocks); // Save the updated blocks as an array
   }, [contentBlocks]);
 
   //const handleFormChange = useCallback((e) => {
@@ -118,14 +135,14 @@ const SelectedNote = () => {
           id,
           title,
           emoji,
-          content,
+          content: contentBlocks, // Join blocks into content string
           coverImage: newCoverImage || coverImage,
         });
       }, 300);
 
       return () => clearTimeout(timer);
     }
-  }, [title, emoji, content, newCoverImage, coverImage]); // Trigger save on changes
+  }, [title, emoji, contentBlocks, newCoverImage, coverImage]); // Trigger save on changes
 
   return (
     <div className={styles.container}>
@@ -177,7 +194,7 @@ const SelectedNote = () => {
               name="title"
               placeholder="Untitled"
               onKeyDown={handleKeyDown}
-              onInput={handleFormChange}
+              onInput={handleTitleChange}
               className={styles.title}
             />
           </div>
