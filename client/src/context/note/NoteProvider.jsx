@@ -1,9 +1,9 @@
-import { useReducer, useEffect } from 'react';
-import axios from 'axios';
+import { useReducer, useEffect } from "react";
+import axios from "axios";
 
-import { useAuthContext } from 'hooks/useAuthContext';
+import { useAuthContext } from "hooks/useAuthContext";
 
-import NoteContext from './note-context';
+import NoteContext from "./note-context";
 
 const initialState = {
   notesAreReady: false,
@@ -17,7 +17,7 @@ const noteReducer = (state, action) => {
   const { type, payload } = action;
 
   switch (type) {
-    case 'LOAD_NOTES': {
+    case "LOAD_NOTES": {
       return {
         ...state,
         notesAreReady: true,
@@ -26,7 +26,7 @@ const noteReducer = (state, action) => {
       };
     }
 
-    case 'NOTE_NOT_FOUND': {
+    case "NOTE_NOT_FOUND": {
       return {
         ...state,
         selectedNote: null,
@@ -34,15 +34,15 @@ const noteReducer = (state, action) => {
       };
     }
 
-    case 'SET_SELECTED_HEADER': {
+    case "SET_SELECTED_HEADER": {
       return {
         ...state,
         selectedNote: payload,
       };
     }
 
-    case 'SET_SELECTED_CONTENT': {
-      console.log('SET_SELECTED_CONTENT is running');
+    case "SET_SELECTED_CONTENT": {
+      console.log("SET_SELECTED_CONTENT is running");
       return {
         ...state,
         selectedNote: !state.selectedNote
@@ -51,7 +51,7 @@ const noteReducer = (state, action) => {
       };
     }
 
-    case 'EDIT_SELECTED_NOTE': {
+    case "EDIT_SELECTED_NOTE": {
       const { key, value } = payload;
       return {
         ...state,
@@ -63,14 +63,14 @@ const noteReducer = (state, action) => {
       };
     }
 
-    case 'SET_EDITING_VALUE': {
+    case "SET_EDITING_VALUE": {
       return {
         ...state,
         editingValue: payload,
       };
     }
 
-    case 'UPDATE_EDITING_VALUE': {
+    case "UPDATE_EDITING_VALUE": {
       const { key, value } = payload;
       return {
         ...state,
@@ -82,15 +82,15 @@ const noteReducer = (state, action) => {
       };
     }
 
-    case 'SAVE_EDITING_VALUE':
-    case 'UPDATE_EMOJI_FROM_NAV': {
+    case "SAVE_EDITING_VALUE":
+    case "UPDATE_EMOJI_FROM_NAV": {
       return {
         ...state,
         ...payload,
       };
     }
 
-    case 'TOGGLE_FAVORITE_NOTE': {
+    case "TOGGLE_FAVORITE_NOTE": {
       return {
         ...state,
         notes: [...payload.notes],
@@ -99,14 +99,14 @@ const noteReducer = (state, action) => {
       };
     }
 
-    case 'UPDATE_NORMAL_NOTES': {
+    case "UPDATE_NORMAL_NOTES": {
       return {
         ...state,
         notes: payload,
       };
     }
 
-    case 'SAVE_SELECTED_CHANGES': {
+    case "SAVE_SELECTED_CHANGES": {
       return {
         ...state,
         notes: payload.notes,
@@ -115,22 +115,22 @@ const noteReducer = (state, action) => {
       };
     }
 
-    case 'SORT_NORMAL_NOTES': {
+    case "SORT_NORMAL_NOTES": {
       return {
         ...state,
         notes: payload,
       };
     }
 
-    case 'SORT_FAVORITE_NOTES': {
+    case "SORT_FAVORITE_NOTES": {
       return {
         ...state,
         favoriteNotes: payload,
       };
     }
 
-    case 'DELETE_NOTE': {
-      console.log('DELETE_NOTE is running');
+    case "DELETE_NOTE": {
+      console.log("DELETE_NOTE is running");
 
       return {
         ...state,
@@ -148,7 +148,7 @@ const NoteProvider = ({ children }) => {
 
   const [state, dispatch] = useReducer(noteReducer, initialState);
 
-  console.log('notes', state);
+  console.log("notes", state);
 
   useEffect(() => {
     if (user) {
@@ -156,7 +156,7 @@ const NoteProvider = ({ children }) => {
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/notes`
         );
-        dispatch({ type: 'LOAD_NOTES', payload: res.data });
+        dispatch({ type: "LOAD_NOTES", payload: res.data });
       })();
     }
   }, [user]);

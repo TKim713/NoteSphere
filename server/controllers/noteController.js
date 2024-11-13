@@ -9,7 +9,8 @@ import {
   removeNote,
   sortNormalList,
   sortFavoriteList,
-} from '../services/noteService.js';
+  fetchNotesByTitle,
+} from "../services/noteService.js";
 
 export const getNote = async (req, res, next) => {
   try {
@@ -53,7 +54,7 @@ export const editNote = async (req, res, next) => {
 
     await saveChangesToNote(userId, noteId, noteDetails, file);
 
-    res.json({ message: 'Success' });
+    res.json({ message: "Success" });
   } catch (err) {
     return next(err);
   }
@@ -64,7 +65,7 @@ export const addNoteToFavorites = async (req, res, next) => {
     const { noteId } = req.params;
 
     await favoriteNote(req.user.id, noteId);
-    res.json({ message: 'Success' });
+    res.json({ message: "Success" });
   } catch (err) {
     return next(err);
   }
@@ -75,7 +76,7 @@ export const removeNoteFromFavorites = async (req, res, next) => {
     const { noteId } = req.params;
 
     await unfavoriteNote(req.user.id, noteId);
-    res.json({ message: 'Success' });
+    res.json({ message: "Success" });
   } catch (err) {
     return next(err);
   }
@@ -106,7 +107,7 @@ export const deleteNote = async (req, res, next) => {
     // const { isFavorite } = req.body;
 
     await removeNote(req.user.id, noteId);
-    res.json({ message: 'Success' });
+    res.json({ message: "Success" });
   } catch (err) {
     return next(err);
   }
@@ -115,7 +116,7 @@ export const deleteNote = async (req, res, next) => {
 export const reorderNormalList = async (req, res, next) => {
   try {
     const sortedNotes = await sortNormalList(req.user.id);
-    res.json({ message: 'Success', sortedNotes });
+    res.json({ message: "Success", sortedNotes });
   } catch (err) {
     return next(err);
   }
@@ -124,7 +125,30 @@ export const reorderNormalList = async (req, res, next) => {
 export const reorderFavoriteList = async (req, res, next) => {
   try {
     const sortedFavoriteNotes = await sortFavoriteList(req.user.id);
-    res.json({ message: 'Success', sortedFavoriteNotes });
+    res.json({ message: "Success", sortedFavoriteNotes });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const searchNotes = async (req, res, next) => {
+  try {
+    const { title } = req.query;
+    const userId = req.user.id;
+
+    if (!title) {
+      return res.status(400).json({ message: "Title is required for search." });
+    }
+
+    const notes = await fetchNotesByTitle(title, userId);
+
+    if (!notes || notes.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No notes found with the specified title." });
+    }
+
+    res.json(notes);
   } catch (err) {
     return next(err);
   }

@@ -4,12 +4,50 @@
   box-shadow: $box-shadow-modal;
 
   .search_box {
+    display: flex;
     padding: 1.5rem 2rem;
     border-bottom: $border;
+    gap: 1rem;
+
+    .search_input {
+      padding: 0.5rem;
+      flex: 1;
+    }
+
+    .search_button {
+      padding: 0.5rem 1rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  }
+
+  .error {
+    color: red;
+    padding: 0.5rem;
+    text-align: center;
   }
 
   .list {
     padding: 1.5rem 2rem;
     text-align: center;
+
+    .note_item {
+      margin-bottom: 1rem;
+
+      .note_title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #b5b5b5;
+        cursor: pointer;
+        transition: color 0.3s ease, transform 0.2s ease;
+
+        &:hover {
+          color: #007bff; // New color on hover
+          transform: scale(1.05); // Slightly enlarges the title on hover
+        }
+      }
+    }
   }
 }
