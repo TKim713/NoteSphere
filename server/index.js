@@ -7,6 +7,7 @@ import { connectDB } from "./config/db.js";
 import { handleError } from "./middlewares/handleError.js";
 import notesRouter from "./routes/notes.js";
 import userRouter from "./routes/user.js";
+import shareRoute from "./routes/email.js";
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use("/api/notes", notesRouter);
 app.use("/api/user", userRouter);
+app.use("/api/share", shareRoute);
 
 app.use(handleError);
 

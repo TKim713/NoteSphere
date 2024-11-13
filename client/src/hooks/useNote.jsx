@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { v4 as uuid } from 'uuid';
-import axios from 'axios';
+import { useState } from "react";
+import { v4 as uuid } from "uuid";
+import axios from "axios";
 
-import { useNoteContext } from './useNoteContext';
+import { useNoteContext } from "./useNoteContext";
 
-import formatDuplicateName from 'utils/formatDuplicateNames';
+import formatDuplicateName from "utils/formatDuplicateNames";
 
 export const useNote = () => {
   const { notes, favoriteNotes, selectedNote, dispatch, editingValue } =
@@ -20,19 +20,19 @@ export const useNote = () => {
       const updatedNotes = [...notes];
       const newNote = {
         id: uuid(),
-        title: '',
-        emoji: '',
+        title: "",
+        emoji: "",
         isFavorite: false,
         index: notes.length,
         favoriteIndex: null,
       };
       updatedNotes.push(newNote);
 
-      dispatch({ type: 'UPDATE_NORMAL_NOTES', payload: updatedNotes });
+      dispatch({ type: "UPDATE_NORMAL_NOTES", payload: updatedNotes });
 
       const config = {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       };
 
@@ -59,7 +59,7 @@ export const useNote = () => {
       const selectedNote = notes.find((note) => note.id === id);
 
       dispatch({
-        type: 'SET_SELECTED_HEADER',
+        type: "SET_SELECTED_HEADER",
         payload: { ...selectedNote, content: null },
       });
 
@@ -67,7 +67,7 @@ export const useNote = () => {
         `${import.meta.env.VITE_API_URL}/api/notes/${id}`
       );
 
-      dispatch({ type: 'SET_SELECTED_CONTENT', payload: res.data.content });
+      dispatch({ type: "SET_SELECTED_CONTENT", payload: res.data.content });
 
       setIsLoading(false);
     } catch (err) {
@@ -80,7 +80,7 @@ export const useNote = () => {
         updatedNotes.splice(existingNoteIndex, 1);
 
         dispatch({
-          type: 'NOTE_NOT_FOUND',
+          type: "NOTE_NOT_FOUND",
           payload: updatedNotes,
         });
       }
@@ -91,20 +91,26 @@ export const useNote = () => {
 
   const editSelectedNote = (key, value) => {
     dispatch({
-      type: 'EDIT_SELECTED_NOTE',
+      type: "EDIT_SELECTED_NOTE",
       payload: { key, value },
     });
   };
 
-  const saveSelectedChanges = async ({ id, title, emoji, content }) => {
+  const saveSelectedChanges = async ({
+    id,
+    title,
+    emoji,
+    content,
+    coverImage,
+  }) => {
     setError(null);
 
     try {
       const updatedNotes = [...notes];
       const updatedFavoriteNotes = [...favoriteNotes];
-      const currentSelectedNote = selectedNote;
+      const currentSelectedNote = { ...selectedNote, coverImage }; // Giữ lại coverImage ở đây
 
-      delete currentSelectedNote.content;
+      // Cập nhật lại currentSelectedNote
       const existingNormalNoteIndex = notes.findIndex((note) => note.id === id);
       updatedNotes.splice(existingNormalNoteIndex, 1, currentSelectedNote);
 
@@ -117,21 +123,23 @@ export const useNote = () => {
           id: currentSelectedNote.id,
           title: currentSelectedNote.title,
           emoji: currentSelectedNote.emoji,
+          coverImage,
         });
       }
 
       dispatch({
-        type: 'SAVE_SELECTED_CHANGES',
+        type: "SAVE_SELECTED_CHANGES",
         payload: {
           notes: updatedNotes,
           favoriteNotes: updatedFavoriteNotes,
           content,
+          coverImage, // Đảm bảo coverImage cũng có mặt ở payload
         },
       });
 
       const config = {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       };
 
@@ -139,6 +147,7 @@ export const useNote = () => {
         title,
         emoji,
         content,
+        coverImage,
       });
 
       await axios.put(
@@ -153,12 +162,12 @@ export const useNote = () => {
   };
 
   const setEditingValue = (payload) => {
-    dispatch({ type: 'SET_EDITING_VALUE', payload });
+    dispatch({ type: "SET_EDITING_VALUE", payload });
   };
 
   const updateEditingValue = (key, value) => {
     dispatch({
-      type: 'UPDATE_EDITING_VALUE',
+      type: "UPDATE_EDITING_VALUE",
       payload: { key, value },
     });
   };
@@ -187,7 +196,7 @@ export const useNote = () => {
       }
 
       dispatch({
-        type: 'SAVE_EDITING_VALUE',
+        type: "SAVE_EDITING_VALUE",
         payload: {
           notes: updatedNotes,
           favoriteNotes: updatedFavoriteNotes,
@@ -196,7 +205,7 @@ export const useNote = () => {
 
       const config = {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       };
 
@@ -249,7 +258,7 @@ export const useNote = () => {
       }
 
       dispatch({
-        type: 'TOGGLE_FAVORITE_NOTE',
+        type: "TOGGLE_FAVORITE_NOTE",
         payload,
       });
 
@@ -292,7 +301,7 @@ export const useNote = () => {
       }
 
       dispatch({
-        type: 'TOGGLE_FAVORITE_NOTE',
+        type: "TOGGLE_FAVORITE_NOTE",
         payload,
       });
 
@@ -319,11 +328,11 @@ export const useNote = () => {
       index,
     }));
 
-    dispatch({ type: 'SORT_NORMAL_NOTES', payload: updatedNotes });
+    dispatch({ type: "SORT_NORMAL_NOTES", payload: updatedNotes });
 
     const config = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     };
 
@@ -352,11 +361,11 @@ export const useNote = () => {
       index,
     }));
 
-    dispatch({ type: 'SORT_FAVORITE_NOTES', payload: updatedNotes });
+    dispatch({ type: "SORT_FAVORITE_NOTES", payload: updatedNotes });
 
     const config = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     };
 
@@ -398,11 +407,11 @@ export const useNote = () => {
 
       updatedNotes.splice(existingNoteIndex + 1, 0, duplicate);
 
-      dispatch({ type: 'UPDATE_NORMAL_NOTES', payload: updatedNotes });
+      dispatch({ type: "UPDATE_NORMAL_NOTES", payload: updatedNotes });
 
       const config = {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       };
 
@@ -453,7 +462,7 @@ export const useNote = () => {
         payload = { notes: updatedNotes, favoriteNotes: updatedFavoriteNotes };
       }
 
-      dispatch({ type: 'DELETE_NOTE', payload });
+      dispatch({ type: "DELETE_NOTE", payload });
 
       await axios.delete(`${import.meta.env.VITE_API_URL}/api/notes/${id}`);
 
@@ -484,7 +493,7 @@ export const useNote = () => {
       }
 
       dispatch({
-        type: 'UPDATE_EMOJI_FROM_NAV',
+        type: "UPDATE_EMOJI_FROM_NAV",
         payload: {
           notes: updatedNotes,
           favoriteNotes: updatedFavoriteNotes,
@@ -493,7 +502,7 @@ export const useNote = () => {
 
       const config = {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       };
 

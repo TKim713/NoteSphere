@@ -1,0 +1,103 @@
+.container {
+  position: absolute;
+  background: $background-modal;
+  border-radius: 0.4rem;
+  user-select: none;
+  min-width: 29rem;
+  max-width: 36rem;
+  padding: 1rem;
+  z-index: 1000;
+
+  .header {
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: $color-lg;
+    }
+  }
+
+  .content {
+    margin-top: 1rem;
+
+    .userInfo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .userAvatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 3.2rem;
+        height: 3.2rem;
+        border-radius: 50%;
+        background-color: $background-button;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .userDetails {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        p {
+          margin: 0;
+        }
+      }
+    }
+
+    .formGroup {
+      margin: 1rem 0;
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .emailInputContainer {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .emailInput {
+          flex: 1;
+          padding: 0.5rem;
+          border-radius: 0.4rem;
+          background: $background-modal;
+          color: white;
+          border: 1px solid $background-button;
+          &:focus {
+            // Removes the default outline
+            outline-color: $background-button;
+            outline-style: 2px groove;
+          }
+        }
+
+        .shareButton {
+          background: $background-button;
+          color: white;
+          padding: 0.7rem 1.2rem;
+          border: none;
+          border-radius: 0.4rem;
+          cursor: pointer;
+
+          &:hover {
+            background-color: $background-modal-h;
+          }
+        }
+      }
+    }
+
+    .permissionSelect {
+      padding: 0.5rem;
+      border-radius: 0.4rem;
+      border: none;
+      background-color: $background-modal;
+      color: white;
+      width: 80px;
+    }
+  }
+}
