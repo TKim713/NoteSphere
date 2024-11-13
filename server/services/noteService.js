@@ -1,5 +1,6 @@
 import NoteDao from "../daos/note/index.js";
 import NoteListDao from "../daos/noteList/index.js";
+import UserPermissionDao from "../daos/userPermission/index.js";
 import CustomError from "../models/CustomError.js";
 
 const checkForExistingNoteAndPermission = async (userId, noteId) => {
@@ -17,22 +18,27 @@ const checkForExistingNoteAndPermission = async (userId, noteId) => {
 };
 
 export const fetchUserNotes = async (userId, { limit = 10, skip = 0 } = {}) => {
-  const notes = await NoteListDao.fetchUserNotes(userId, {limit, skip});
+  const notes = await NoteListDao.fetchUserNotes(userId, { limit, skip });
+
+  const combinedNotes = [
+    ...notes.normalListOrder,
+    ...notes.favoriteListOrder,
+    ...notes.sharedListOrder.map((sharedNote) => sharedNote.note),
+  ];
 
   const paginatedNotes = {
-    total: notes.normalListOrder.length,
-    data: notes.normalListOrder.slice(skip, skip + limit),
+    total: combinedNotes.length,
+    data: combinedNotes.slice(skip, skip + limit),
     limit,
     skip,
   };
 
-  // Check if there are more notes to load
-  paginatedNotes.hasMore = (skip + limit) < notes.normalListOrder.length;
+  paginatedNotes.hasMore = (skip + limit) < combinedNotes.length;
 
   paginatedNotes.data = paginatedNotes.data.map((note) => ({
     ...note,
     isFavorite: notes.favoriteListOrder.some((favoriteNote) => favoriteNote.id === note.id),
-    isShared: notes.sharedListOrder.some((sharedNote) => sharedNote.id === note.id),
+    isShared: notes.sharedListOrder.some((sharedNote) => sharedNote.note && sharedNote.note.id === note.id),
   }));
 
   return paginatedNotes;
@@ -46,7 +52,7 @@ export const fetchNoteContent = async (userId, noteId) => {
   }
 
   if (note.userId.toString() !== userId) {
-    throw new CustomError("Not authorized to access this resource.", 403);
+    await UserPermissionDao.checkPermission(userId, noteId, 'View');
   }
 
   return { content: note.content };
@@ -89,7 +95,7 @@ export const duplicateNote = async ({
 };
 
 export const saveChangesToNote = async (userId, noteId, noteDetails, file) => {
-  await checkForExistingNoteAndPermission(userId, noteId);
+  await UserPermissionDao.checkPermission(userId, noteId, 'Edit');
   let coverImageUrl = null;
   if (file) {
     const uploadResult = await NoteDao.uploadImageToCloudinary(file);

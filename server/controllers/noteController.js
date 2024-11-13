@@ -20,6 +20,9 @@ export const getNote = async (req, res, next) => {
 
     res.json(noteContent);
   } catch (err) {
+    if (err.message === 'No permission found for this note' || err.message === 'Insufficient permission for this action') {
+      return res.status(403).json({ message: err.message });
+    }
     return next(err);
   }
 };
