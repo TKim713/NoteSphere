@@ -17,11 +17,32 @@
       height: 100%;
       object-fit: cover;
     }
+    .changeCoverLabel {
+      position: absolute;
+      top: 60px;
+      right: 10px;
+      background-color: $color-lg;
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background-color 0.3s ease;
+  
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.7);
+      }
+    }
 
     .header {
-      padding: 0rem 10rem 0;
+      padding: 10rem 10rem 0;
       width: 100%;
-
+      &.withCoverImage {
+        padding: 0 10rem 0;
+      }
       .emoji_wrapper {
         display: inline-block;
         user-select: none;

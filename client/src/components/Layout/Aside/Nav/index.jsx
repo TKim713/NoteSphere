@@ -26,9 +26,9 @@ const Nav = () => {
   };
 
   // Load more notes when "Load More" button is clicked
-  const handleLoadMore = async () => {
-    await loadMoreNotes();
-  };
+  // const handleLoadMore = async () => {
+  //   await loadMoreNotes();
+  // };
 
   // Handle automatic navigation when a note is created
   useEffect(() => {
@@ -107,7 +107,7 @@ const Nav = () => {
                   selectedNote={selectedNote}
                 />
                 {/* Load More Button */}
-                {hasMoreNotes && (
+                {/* {hasMoreNotes && (
                   <div className={styles.loadMoreContainer}>
                     <button
                       onClick={handleLoadMore}
@@ -117,7 +117,7 @@ const Nav = () => {
                       More
                     </button>
                   </div>
-                )}
+                )} */}
               </>
             )}
           </ul>

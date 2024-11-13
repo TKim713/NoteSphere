@@ -17,22 +17,27 @@ const checkForExistingNoteAndPermission = async (userId, noteId) => {
 };
 
 export const fetchUserNotes = async (userId, { limit = 10, skip = 0 } = {}) => {
-  const notes = await NoteListDao.fetchUserNotes(userId, {limit, skip});
+  const notes = await NoteListDao.fetchUserNotes(userId, { limit, skip });
+
+  const combinedNotes = [
+    ...notes.normalListOrder,
+    ...notes.favoriteListOrder,
+    ...notes.sharedListOrder.map((sharedNote) => sharedNote.note),
+  ];
 
   const paginatedNotes = {
-    total: notes.normalListOrder.length,
-    data: notes.normalListOrder.slice(skip, skip + limit),
+    total: combinedNotes.length,
+    data: combinedNotes.slice(skip, skip + limit),
     limit,
     skip,
   };
 
-  // Check if there are more notes to load
-  paginatedNotes.hasMore = (skip + limit) < notes.normalListOrder.length;
+  paginatedNotes.hasMore = (skip + limit) < combinedNotes.length;
 
   paginatedNotes.data = paginatedNotes.data.map((note) => ({
     ...note,
     isFavorite: notes.favoriteListOrder.some((favoriteNote) => favoriteNote.id === note.id),
-    isShared: notes.sharedListOrder.some((sharedNote) => sharedNote.id === note.id),
+    isShared: notes.sharedListOrder.some((sharedNote) => sharedNote.note && sharedNote.note.id === note.id),
   }));
 
   return paginatedNotes;
