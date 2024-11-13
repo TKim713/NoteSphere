@@ -1,48 +1,47 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaAngleRight, FaPlus } from 'react-icons/fa';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaAngleRight, FaPlus } from "react-icons/fa";
+import { AiOutlineEllipsis } from "react-icons/ai";
+import { useNoteContext } from "hooks/useNoteContext";
+import { useNote } from "hooks/useNote";
 
-import { useNoteContext } from 'hooks/useNoteContext';
-import { useNote } from 'hooks/useNote';
+import NavDragContainer from "./NavDragContainer";
 
-import NavDragContainer from './NavDragContainer';
-
-import styles from './index.module.scss';
-
-// TODO: Remove
-const USER = {
-  username: 'jpquintana',
-  imageUrl: 'https://wallpaperaccess.com/full/1428034.jpg',
-};
+import styles from "./index.module.scss";
 
 const Nav = () => {
   const navigate = useNavigate();
-
-  const { notes, favoriteNotes, selectedNote } = useNoteContext();
-  const { createNote } = useNote();
-
-  // const favoriteNotes = notes.filter((note) => note.isFavorite);
+  const { notes = [], favoriteNotes = [], selectedNote } = useNoteContext();
+  const { createNote, loadMoreNotes, hasMoreNotes } = useNote();
 
   const [showFavorites, setShowFavorites] = useState(false);
   const [showNotes, setShowNotes] = useState(true);
   const [needToNavigate, setNeedToNavigate] = useState(false);
 
+  // Add a new note
   const handleAddNote = async (e) => {
     await createNote();
     setShowNotes(true);
     setNeedToNavigate(true);
   };
 
+  // Load more notes when "Load More" button is clicked
+  const handleLoadMore = async () => {
+    await loadMoreNotes();
+  };
+
+  // Handle automatic navigation when a note is created
   useEffect(() => {
     if (needToNavigate && notes.length > 0) {
       navigate(`/notes/${notes[0].id}`);
       setNeedToNavigate(false);
     }
-  }, [needToNavigate]);
+  }, [needToNavigate, notes, navigate]);
 
   return (
     <div className={styles.container}>
       <nav className={styles.nav}>
+        {/* If no notes, show the 'Add Note' option */}
         {notes.length === 0 && (
           <div className={styles.list}>
             <div onClick={handleAddNote} className={styles.list_header}>
@@ -51,12 +50,14 @@ const Nav = () => {
                   showFavorites ? styles.icon_open : undefined
                 }`}
               >
-                <FaPlus size={'1.3rem'} />
+                <FaPlus size={"1.3rem"} />
               </div>
               <p>Add Note</p>
             </div>
           </div>
         )}
+
+        {/* If there are favorite notes, show them */}
         {favoriteNotes.length > 0 && (
           <ul className={styles.list}>
             <div
@@ -82,6 +83,7 @@ const Nav = () => {
           </ul>
         )}
 
+        {/* If there are normal notes, show them */}
         {notes.length > 0 && (
           <ul className={styles.list}>
             <div
@@ -98,11 +100,25 @@ const Nav = () => {
               <p>Notes:</p>
             </div>
             {showNotes && (
-              <NavDragContainer
-                containerType="normal"
-                notes={notes}
-                selectedNote={selectedNote}
-              />
+              <>
+                <NavDragContainer
+                  containerType="normal"
+                  notes={notes}
+                  selectedNote={selectedNote}
+                />
+                {/* Load More Button */}
+                {hasMoreNotes && (
+                  <div className={styles.loadMoreContainer}>
+                    <button
+                      onClick={handleLoadMore}
+                      className={styles.loadMoreButton}
+                    >
+                      <AiOutlineEllipsis />
+                      More
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </ul>
         )}

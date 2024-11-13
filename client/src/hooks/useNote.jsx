@@ -1,38 +1,47 @@
-import { useState } from 'react';
-import { v4 as uuid } from 'uuid';
-import axios from 'axios';
+import { useState } from "react";
+import { v4 as uuid } from "uuid";
+import axios from "axios";
 
-import { useNoteContext } from './useNoteContext';
+import { useNoteContext } from "./useNoteContext";
 
-import formatDuplicateName from 'utils/formatDuplicateNames';
+import formatDuplicateName from "utils/formatDuplicateNames";
 
 export const useNote = () => {
-  const { notes, favoriteNotes, selectedNote, dispatch, editingValue } =
-    useNoteContext();
+  const {
+    notes = [],
+    favoriteNotes = [],
+    selectedNote,
+    dispatch,
+    editingValue,
+  } = useNoteContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [hasMoreNotes, setHasMoreNotes] = useState(true); // Add state for checking if more notes are available
+  const [currentPage, setCurrentPage] = useState(0);
 
   const createNote = async () => {
     setIsLoading(true);
 
     try {
-      const updatedNotes = [...notes];
+      // const updatedNotes = [...notes];
+      const updatedNotes = Array.isArray(notes) ? [...notes] : [];
+
       const newNote = {
         id: uuid(),
-        title: '',
-        emoji: '',
+        title: "",
+        emoji: "",
         isFavorite: false,
         index: notes.length,
         favoriteIndex: null,
       };
       updatedNotes.push(newNote);
 
-      dispatch({ type: 'UPDATE_NORMAL_NOTES', payload: updatedNotes });
+      dispatch({ type: "UPDATE_NORMAL_NOTES", payload: updatedNotes });
 
       const config = {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       };
 
@@ -45,13 +54,48 @@ export const useNote = () => {
         body,
         config
       );
-
+      // setSelectedNote(newNote.id);//tu dong chuyen sang note moi tao
+      dispatch({
+        type: "SET_SELECTED_HEADER",
+        payload: { ...newNote, content: null },
+      });
       setIsLoading(false);
     } catch (err) {
       console.error(err.message);
       setIsLoading(false);
     }
   };
+  const loadMoreNotes = async () => {
+    if (isLoading) return; // Prevent multiple simultaneous requests
+    setIsLoading(true);
+  
+    try {
+      const skip = currentPage * 10; // Skip notes already loaded
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/notes`, {
+        params: { skip, limit: 10 },
+      });
+  
+      const newNotes = response.data.data;
+      const updatedNotes = [
+        ...notes,
+        ...newNotes.filter((note) => !notes.some((existingNote) => existingNote.id === note.id)),
+      ];
+  
+      // Dispatch the updated notes list
+      dispatch({ type: "UPDATE_NORMAL_NOTES", payload: updatedNotes });
+  
+      setCurrentPage((prevPage) => prevPage + 1);
+      setHasMoreNotes(response.data.hasMore);
+      setIsLoading(false);
+    } catch (err) {
+      console.error(err.message);
+      setError(err);
+      setIsLoading(false);
+    }
+  };
+  
+  
+  const renderLoadMoreButton = !isLoading && notes.length >= 10 && hasMoreNotes;
 
   const setSelectedNote = async (id) => {
     setIsLoading(true);
@@ -59,7 +103,7 @@ export const useNote = () => {
       const selectedNote = notes.find((note) => note.id === id);
 
       dispatch({
-        type: 'SET_SELECTED_HEADER',
+        type: "SET_SELECTED_HEADER",
         payload: { ...selectedNote, content: null },
       });
 
@@ -67,20 +111,21 @@ export const useNote = () => {
         `${import.meta.env.VITE_API_URL}/api/notes/${id}`
       );
 
-      dispatch({ type: 'SET_SELECTED_CONTENT', payload: res.data.content });
+      dispatch({ type: "SET_SELECTED_CONTENT", payload: res.data.content });
 
       setIsLoading(false);
     } catch (err) {
       console.error(err.message);
       if (err.response.status === 404) {
-        const updatedNotes = [...notes];
+        // const updatedNotes = [...notes];
+        const updatedNotes = Array.isArray(notes) ? [...notes] : [];
 
         const existingNoteIndex = notes.findIndex((note) => note.id === id);
 
         updatedNotes.splice(existingNoteIndex, 1);
 
         dispatch({
-          type: 'NOTE_NOT_FOUND',
+          type: "NOTE_NOT_FOUND",
           payload: updatedNotes,
         });
       }
@@ -91,27 +136,35 @@ export const useNote = () => {
 
   const editSelectedNote = (key, value) => {
     dispatch({
-      type: 'EDIT_SELECTED_NOTE',
+      type: "EDIT_SELECTED_NOTE",
       payload: { key, value },
     });
   };
 
-  const saveSelectedChanges = async ({ id, title, emoji, content, coverImage }) => {
+  const saveSelectedChanges = async ({
+    id,
+    title,
+    emoji,
+    content,
+    coverImage,
+  }) => {
     setError(null);
-  
+
     try {
-      const updatedNotes = [...notes];
+      // const updatedNotes = [...notes];
+      const updatedNotes = Array.isArray(notes) ? [...notes] : [];
+
       const updatedFavoriteNotes = [...favoriteNotes];
       const currentSelectedNote = { ...selectedNote, coverImage }; // Giữ lại coverImage ở đây
-  
+
       // Cập nhật lại currentSelectedNote
       const existingNormalNoteIndex = notes.findIndex((note) => note.id === id);
       updatedNotes.splice(existingNormalNoteIndex, 1, currentSelectedNote);
-  
+
       const existingFavoriteNoteIndex = favoriteNotes.findIndex(
         (note) => note.id === id
       );
-  
+
       if (existingFavoriteNoteIndex >= 0) {
         updatedFavoriteNotes.splice(existingFavoriteNoteIndex, 1, {
           id: currentSelectedNote.id,
@@ -120,9 +173,9 @@ export const useNote = () => {
           coverImage,
         });
       }
-  
+
       dispatch({
-        type: 'SAVE_SELECTED_CHANGES',
+        type: "SAVE_SELECTED_CHANGES",
         payload: {
           notes: updatedNotes,
           favoriteNotes: updatedFavoriteNotes,
@@ -130,20 +183,20 @@ export const useNote = () => {
           coverImage, // Đảm bảo coverImage cũng có mặt ở payload
         },
       });
-  
+
       const config = {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       };
-  
+
       const body = JSON.stringify({
         title,
         emoji,
         content,
         coverImage,
       });
-  
+
       await axios.put(
         `${import.meta.env.VITE_API_URL}/api/notes/${id}`,
         body,
@@ -156,12 +209,12 @@ export const useNote = () => {
   };
 
   const setEditingValue = (payload) => {
-    dispatch({ type: 'SET_EDITING_VALUE', payload });
+    dispatch({ type: "SET_EDITING_VALUE", payload });
   };
 
   const updateEditingValue = (key, value) => {
     dispatch({
-      type: 'UPDATE_EDITING_VALUE',
+      type: "UPDATE_EDITING_VALUE",
       payload: { key, value },
     });
   };
@@ -170,7 +223,9 @@ export const useNote = () => {
     setError(null);
     console.log(id, title, emoji);
     try {
-      const updatedNotes = [...notes];
+      // const updatedNotes = [...notes];
+      const updatedNotes = Array.isArray(notes) ? [...notes] : [];
+
       const updatedFavoriteNotes = [...favoriteNotes];
       const currentEditingValue = editingValue;
 
@@ -190,7 +245,7 @@ export const useNote = () => {
       }
 
       dispatch({
-        type: 'SAVE_EDITING_VALUE',
+        type: "SAVE_EDITING_VALUE",
         payload: {
           notes: updatedNotes,
           favoriteNotes: updatedFavoriteNotes,
@@ -199,7 +254,7 @@ export const useNote = () => {
 
       const config = {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       };
 
@@ -223,7 +278,9 @@ export const useNote = () => {
     setError(null);
 
     try {
-      const updatedNotes = [...notes];
+      // const updatedNotes = [...notes];
+      const updatedNotes = Array.isArray(notes) ? [...notes] : [];
+
       const updatedFavoriteNotes = [...favoriteNotes];
 
       const existingNoteIndex = notes.findIndex((note) => note.id === id);
@@ -252,7 +309,7 @@ export const useNote = () => {
       }
 
       dispatch({
-        type: 'TOGGLE_FAVORITE_NOTE',
+        type: "TOGGLE_FAVORITE_NOTE",
         payload,
       });
 
@@ -269,7 +326,9 @@ export const useNote = () => {
     setError(null);
 
     try {
-      const updatedNotes = [...notes];
+      // const updatedNotes = [...notes];
+      const updatedNotes = Array.isArray(notes) ? [...notes] : [];
+
       const updatedFavoriteNotes = favoriteNotes.filter(
         (note) => note.id !== id
       );
@@ -295,7 +354,7 @@ export const useNote = () => {
       }
 
       dispatch({
-        type: 'TOGGLE_FAVORITE_NOTE',
+        type: "TOGGLE_FAVORITE_NOTE",
         payload,
       });
 
@@ -322,11 +381,11 @@ export const useNote = () => {
       index,
     }));
 
-    dispatch({ type: 'SORT_NORMAL_NOTES', payload: updatedNotes });
+    dispatch({ type: "SORT_NORMAL_NOTES", payload: updatedNotes });
 
     const config = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     };
 
@@ -355,11 +414,11 @@ export const useNote = () => {
       index,
     }));
 
-    dispatch({ type: 'SORT_FAVORITE_NOTES', payload: updatedNotes });
+    dispatch({ type: "SORT_FAVORITE_NOTES", payload: updatedNotes });
 
     const config = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     };
 
@@ -379,7 +438,8 @@ export const useNote = () => {
     // setIsLoading(true);
 
     try {
-      const updatedNotes = [...notes];
+      // const updatedNotes = [...notes];
+      const updatedNotes = Array.isArray(notes) ? [...notes] : [];
 
       const existingNote = notes.find((note) => note.id === id);
 
@@ -401,11 +461,11 @@ export const useNote = () => {
 
       updatedNotes.splice(existingNoteIndex + 1, 0, duplicate);
 
-      dispatch({ type: 'UPDATE_NORMAL_NOTES', payload: updatedNotes });
+      dispatch({ type: "UPDATE_NORMAL_NOTES", payload: updatedNotes });
 
       const config = {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       };
 
@@ -430,7 +490,9 @@ export const useNote = () => {
     setIsLoading(true);
 
     try {
-      const updatedNotes = [...notes];
+      // const updatedNotes = [...notes];
+      const updatedNotes = Array.isArray(notes) ? [...notes] : [];
+
       const updatedFavoriteNotes = [...favoriteNotes];
 
       const existingNoteIndex = notes.findIndex((note) => note.id === id);
@@ -456,7 +518,7 @@ export const useNote = () => {
         payload = { notes: updatedNotes, favoriteNotes: updatedFavoriteNotes };
       }
 
-      dispatch({ type: 'DELETE_NOTE', payload });
+      dispatch({ type: "DELETE_NOTE", payload });
 
       await axios.delete(`${import.meta.env.VITE_API_URL}/api/notes/${id}`);
 
@@ -487,7 +549,7 @@ export const useNote = () => {
       }
 
       dispatch({
-        type: 'UPDATE_EMOJI_FROM_NAV',
+        type: "UPDATE_EMOJI_FROM_NAV",
         payload: {
           notes: updatedNotes,
           favoriteNotes: updatedFavoriteNotes,
@@ -496,7 +558,7 @@ export const useNote = () => {
 
       const config = {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       };
 
@@ -520,6 +582,7 @@ export const useNote = () => {
   return {
     setSelectedNote,
     createNote,
+    loadMoreNotes,
     editSelectedNote,
     saveSelectedChanges,
     favoriteNote,
@@ -534,5 +597,7 @@ export const useNote = () => {
     updateEmojiFromNav,
     isLoading,
     error,
+    hasMoreNotes,
+    renderLoadMoreButton,
   };
 };

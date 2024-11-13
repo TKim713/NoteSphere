@@ -101,7 +101,7 @@ const Header = ({ selectedNote }) => {
                 {selectedNote.emoji || `\u{1F5CB}`}
               </div>
               <p className={styles.title}>
-                {selectedNote.title.length > 0
+                {selectedNote && selectedNote.title && selectedNote.title.length > 0
                   ? selectedNote.title
                   : "Untitled"}
               </p>

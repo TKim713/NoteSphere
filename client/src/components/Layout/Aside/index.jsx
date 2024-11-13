@@ -21,6 +21,7 @@ const USER = {
 const Aside = () => {
   const { createNote, isLoading } = useNote();
   const { user } = useAuthContext();
+  console.log("User:", user);
 
   const [showSearch, setShowSearch] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);

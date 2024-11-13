@@ -25,10 +25,14 @@ const Note = () => {
     fetchSelectedNote();
   }, [noteId]);
 
-  if (!notes.find((note) => note.id === noteId)) {
+  // if (!notes.find((note) => note.id === noteId)) {
+  //   return <Navigate to="/" />;
+  // }
+
+  if (!notes || !notes.find((note) => note.id === noteId)) {
     return <Navigate to="/" />;
   }
-
+  
   console.log(selectedNote);
 
   return (

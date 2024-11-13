@@ -184,16 +184,31 @@ const NoteProvider = ({ children }) => {
 
   console.log("notes", state);
 
+  // useEffect(() => {
+  //   if (user) {
+  //     (async () => {
+  //       const res = await axios.get(
+  //         `${import.meta.env.VITE_API_URL}/api/notes`
+  //       );
+  //       dispatch({ type: "LOAD_NOTES", payload: res.data });
+  //     })();
+  //   }
+  // }, [user]);
   useEffect(() => {
     if (user) {
       (async () => {
         const res = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/notes`
         );
-        dispatch({ type: "LOAD_NOTES", payload: res.data });
+        // Chuyển data từ backend vào payload
+        dispatch({ type: "LOAD_NOTES", payload: { 
+          normalListOrder: res.data.data, 
+          favoriteListOrder: res.data.data.filter(note => note.isFavorite) 
+        } });
       })();
     }
   }, [user]);
+  
 
   return (
     <NoteContext.Provider value={{ ...state, dispatch }}>

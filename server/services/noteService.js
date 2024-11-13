@@ -17,7 +17,7 @@ const checkForExistingNoteAndPermission = async (userId, noteId) => {
 };
 
 export const fetchUserNotes = async (userId, { limit = 10, skip = 0 } = {}) => {
-  const notes = await NoteListDao.fetchUserNotes(userId);
+  const notes = await NoteListDao.fetchUserNotes(userId, {limit, skip});
 
   const paginatedNotes = {
     total: notes.normalListOrder.length,
@@ -25,6 +25,9 @@ export const fetchUserNotes = async (userId, { limit = 10, skip = 0 } = {}) => {
     limit,
     skip,
   };
+
+  // Check if there are more notes to load
+  paginatedNotes.hasMore = (skip + limit) < notes.normalListOrder.length;
 
   paginatedNotes.data = paginatedNotes.data.map((note) => ({
     ...note,
