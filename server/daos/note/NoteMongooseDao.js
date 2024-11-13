@@ -1,7 +1,7 @@
-import MongooseClass from '../base/MongooseClass.js';
-import Note from '../../models/Note.js';
-import NoteListDao from '../noteList/index.js';
-import cloudinary from '../../middlewares/cloudinaryConfig.js';
+import MongooseClass from "../base/MongooseClass.js";
+import Note from "../../models/Note.js";
+import NoteListDao from "../noteList/index.js";
+import cloudinary from "../../middlewares/cloudinaryConfig.js";
 class NoteMongooseDao extends MongooseClass {
   constructor() {
     super(Note);
@@ -16,7 +16,7 @@ class NoteMongooseDao extends MongooseClass {
   }
 
   async fetchNoteContentById(id) {
-    return await this.collection.findOne({ id }).select('content userId');
+    return await this.collection.findOne({ id }).select("content userId");
   }
 
   async fetchByTitle(title) {
@@ -57,17 +57,26 @@ class NoteMongooseDao extends MongooseClass {
 
   async uploadImageToCloudinary(file) {
     if (!file) {
-      throw new Error('No file provided for upload.');
+      throw new Error("No file provided for upload.");
     }
 
     try {
-      const uploadResult = await cloudinary.uploader.upload(file.path || file.buffer, {
-        resource_type: 'auto'
-      });
+      const uploadResult = await cloudinary.uploader.upload(
+        file.path || file.buffer,
+        {
+          resource_type: "auto",
+        }
+      );
       return uploadResult;
     } catch (err) {
-      throw new Error('Error uploading image to Cloudinary: ' + err.message);
+      throw new Error("Error uploading image to Cloudinary: " + err.message);
     }
+  }
+  async fetchNoteByTitle(title, userId) {
+    return await this.collection.find({
+      userId,
+      title: { $regex: title, $options: "i" }, // Sử dụng regex để tìm kiếm không phân biệt chữ hoa/thường
+    });
   }
 }
 
