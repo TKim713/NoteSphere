@@ -3,7 +3,7 @@ import NoteListDao from "../daos/noteList/index.js";
 import UserPermissionDao from "../daos/userPermission/index.js";
 import CustomError from "../models/CustomError.js";
 
-const checkForExistingNoteAndPermission = async (userId, noteId) => {
+const checkForExistingNoteAndPermission = async (userId, noteId, permission) => {
   const existingNote = await NoteDao.fetchNoteById(noteId);
 
   if (!existingNote) {
@@ -11,7 +11,7 @@ const checkForExistingNoteAndPermission = async (userId, noteId) => {
   }
 
   if (existingNote.userId.toString() !== userId) {
-    throw new CustomError("Not authorized to access this resource.", 403);
+    await UserPermissionDao.checkPermission(userId, noteId, permission);
   }
 
   return existingNote;
@@ -95,7 +95,7 @@ export const duplicateNote = async ({
 };
 
 export const saveChangesToNote = async (userId, noteId, noteDetails, file) => {
-  await UserPermissionDao.checkPermission(userId, noteId, 'Edit');
+  await checkForExistingNoteAndPermission(userId, noteId, 'Edit');
   let coverImageUrl = null;
   if (file) {
     const uploadResult = await NoteDao.uploadImageToCloudinary(file);
@@ -117,7 +117,7 @@ export const unfavoriteNote = async (userId, noteId) => {
 };
 
 export const removeNote = async (userId, noteId) => {
-  await checkForExistingNoteAndPermission(userId, noteId);
+  await checkForExistingNoteAndPermission(userId, noteId, "Edit");
 
   const deletedNote = await NoteDao.deleteNote(userId, noteId);
 
@@ -138,4 +138,14 @@ export const sortSharedList = async (userId, newOrder) => {
 
 export const fetchNotesByTitle = async (title, userId) => {
   return await NoteDao.fetchNoteByTitle(title, userId);
+};
+
+export const changePermission = async (userId, noteId, sharedUserId, permission) => {
+  await checkForExistingNoteAndPermission(userId, noteId, 'All');
+  return await UserPermissionDao.assignPermission(noteId, sharedUserId, permission);
+};
+
+export const fetchSharedUsers = async (noteId, userId, { limit = 5, skip = 0 } = {}) => {
+  await checkForExistingNoteAndPermission(userId, noteId, 'All');
+  return await UserPermissionDao.fetchSharedUsersByNoteId(noteId, { limit, skip });
 };

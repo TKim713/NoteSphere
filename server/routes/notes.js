@@ -12,6 +12,8 @@ import {
   reorderNormalList,
   reorderFavoriteList,
   searchNotes,
+  changePermissionController,
+  getSharedUsers
 } from "../controllers/noteController.js";
 
 import { checkAuth } from "../middlewares/checkAuth.js";
@@ -22,11 +24,13 @@ const router = Router();
 router.get("/", checkAuth, getUserNotes);
 router.get("/search", checkAuth, searchNotes);
 router.get("/:noteId", checkAuth, getNote);
+router.get("/:noteId/sharedUsers", checkAuth, getSharedUsers);
 router.put("/sortNormalList", checkAuth, reorderNormalList);
 router.put("/sortFavoriteList", checkAuth, reorderFavoriteList);
 router.put("/:noteId", checkAuth, upload.single("coverImage"), editNote);
 router.put("/:noteId/favorite", checkAuth, addNoteToFavorites);
 router.put("/:noteId/unfavorite", checkAuth, removeNoteFromFavorites);
+router.put("/:noteId/changePermission", checkAuth, changePermissionController);
 router.post("/", checkAuth, createNote);
 router.post("/:noteId/duplicate", checkAuth, createDuplicateNote);
 router.delete("/:noteId", checkAuth, deleteNote);
