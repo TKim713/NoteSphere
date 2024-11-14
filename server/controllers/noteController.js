@@ -10,6 +10,8 @@ import {
   sortNormalList,
   sortFavoriteList,
   fetchNotesByTitle,
+  changePermission,
+  fetchSharedUsers
 } from "../services/noteService.js";
 
 export const getNote = async (req, res, next) => {
@@ -155,6 +157,32 @@ export const searchNotes = async (req, res, next) => {
     }
 
     res.json(notes);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const changePermissionController = async (req, res, next) => {
+  try {
+    const { noteId } = req.params;
+    const { sharedUserId, permission } = req.body;
+    const userId = req.user.id;
+
+    await changePermission(userId, noteId, sharedUserId, permission);
+    res.json({ message: "Permission updated successfully" });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const getSharedUsers = async (req, res, next) => {
+  try {
+    const { noteId } = req.params;
+    const userId = req.user.id;
+
+    const sharedUsers = await fetchSharedUsers(noteId, userId);
+
+    res.json(sharedUsers);
   } catch (err) {
     return next(err);
   }
