@@ -22,6 +22,7 @@ const PopupMenu = ({ onSelect, position }) => {
           >
             Normal Text Block
           </li>
+          <li onClick={() => onSelect("image")}>Add Image</li>{" "}
           <li
             onClick={() => {
               onSelect("note");

@@ -35,6 +35,7 @@ const SelectedNote = () => {
   const [newCoverImage, setNewCoverImage] = useState(null); // State for new cover image
   const [showPopup, setShowPopup] = useState({ show: false, index: null }); // State for the popup menu
   const [blockType, setBlockType] = useState("normal"); // Default to normal block
+  const [imageBlockIndex, setImageBlockIndex] = useState(null);
 
   const handleEmojiSelect = (e) => {
     editSelectedNote("emoji", e.native);
@@ -61,12 +62,11 @@ const SelectedNote = () => {
         id,
         title,
         emoji,
-        content: contentBlocks, 
-        coverImage: file,  // Use the new file directly for upload
+        content: contentBlocks,
+        coverImage: file, // Use the new file directly for upload
       });
     }
   };
-  
 
   const handleFormChange = useCallback(
     (e, index) => {
@@ -105,16 +105,18 @@ const SelectedNote = () => {
       position: { top: top + height, left }, // Position popup below the button
     });
   };
-  
 
   const handleSelect = (type, index) => {
     if (type === "normal") {
       addNewBlock(index); // Adds a block at the correct index
     } else if (type === "note") {
       createNewNote(); // Create a new note when "Note Block" is selected
+    } else if (type === "image") {
+      setImageBlockIndex(index); // Set the index of the block where the image will go
+      document.getElementById("imageInput").click(); // Trigger file input click
     }
     // Close the popup after selecting an option
-    setShowPopup({ show: false, index: null, position: { top: 0, left: 0 }});
+    setShowPopup({ show: false, index: null, position: { top: 0, left: 0 } });
   };
 
   // Function to create a new note
@@ -126,6 +128,18 @@ const SelectedNote = () => {
     } catch (error) {
       console.error("Error creating new note:", error);
       // Handle the error appropriately (e.g., show a notification)
+    }
+  };
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file && imageBlockIndex !== null) {
+      const newContentBlocks = [...contentBlocks];
+      const imageUrl = URL.createObjectURL(file);
+
+      // Insert the image directly as an object with 'type' and 'src'
+      newContentBlocks[imageBlockIndex] = { type: "image", src: imageUrl };
+      setContentBlocks(newContentBlocks);
+      setImageBlockIndex(null); // Reset image block index after insertion
     }
   };
 
@@ -147,7 +161,8 @@ const SelectedNote = () => {
       return () => clearTimeout(timer);
     }
   }, [title, emoji, contentBlocks, newCoverImage, coverImage]); // Trigger save on changes
-
+  const headerPadding =
+    newCoverImage || coverImage ? "0 10rem 0" : "10rem 10rem 0";
   return (
     <div className={styles.container}>
       <div className={styles.note}>
@@ -177,6 +192,7 @@ const SelectedNote = () => {
           className={`${styles.header} ${
             coverImage ? styles.withCoverImage : ""
           }`}
+          style={{ padding: headerPadding }}
         >
           <div
             onClick={() => setShowPicker(true)}
@@ -234,20 +250,38 @@ const SelectedNote = () => {
               >
                 <IoIosAdd />
               </button>
-              <Editor
-                value={block}
-                name={`content-block-${index}`}
-                placeholder="Add note"
-                onInput={(e) => handleFormChange(e, index)} // Handle content block change
-                className={styles.content}
-                ref={index === 0 ? contentRef : null}
-              />
+              {block.type === "image" ? (
+                <img
+                  src={block.src}
+                  alt="Uploaded Image"
+                  className={styles.imageBlock}
+                />
+              ) : (
+                <Editor
+                  value={block}
+                  name={`content-block-${index}`}
+                  placeholder="Add note"
+                  onInput={(e) => handleFormChange(e, index)}
+                  className={styles.content}
+                  ref={index === 0 ? contentRef : null}
+                />
+              )}
               {showPopup.show && showPopup.index === index && (
-                <PopupMenu onSelect={(type) => handleSelect(type, index)} position={showPopup.position} /> // Show PopupMenu for the correct block
+                <PopupMenu
+                  onSelect={(type) => handleSelect(type, index)}
+                  position={showPopup.position}
+                /> // Show PopupMenu for the correct block
               )}
             </div>
           ))}
         </div>
+        <input
+          type="file"
+          id="imageInput"
+          onChange={handleImageSelect}
+          style={{ display: "none" }}
+          accept="image/*"
+        />
       </div>
     </div>
   );
