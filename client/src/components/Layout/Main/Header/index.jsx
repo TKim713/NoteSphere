@@ -17,7 +17,7 @@ import User from "../../../../../../server/models/User";
 import { useAuthContext } from "../../../../hooks/useAuthContext";
 
 const Header = ({ selectedNote }) => {
-  const { favoriteNote, unfavoriteNote } = useNote();
+  const { favoriteNote, unfavoriteNote, sharedNote } = useNote();
   const { user } = useAuthContext();
   const [editMenuPosition, setEditMenuPosition] = useState(null);
   const [showEditMenu, setShowEditMenu] = useState(false);

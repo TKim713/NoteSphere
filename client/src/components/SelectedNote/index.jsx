@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { FaSmile, FaImage } from "react-icons/fa";
-
+import { IoIosAdd } from "react-icons/io";
 import { useNote } from "hooks/useNote";
 import { useNoteContext } from "hooks/useNoteContext";
 
@@ -53,30 +53,21 @@ const SelectedNote = () => {
   const handleTitleChange = (e) => {
     editSelectedNote("title", e.target.value); // Update title in state
   };
-
   const handleCoverImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewCoverImage(reader.result); // Set the new cover image as base64
-        editSelectedNote("coverImage", reader.result); // Update selected note with new cover image
-      };
-      reader.readAsDataURL(file);
+      setNewCoverImage(URL.createObjectURL(file)); // Display the image immediately using URL.createObjectURL
+      saveSelectedChanges({
+        id,
+        title,
+        emoji,
+        content: contentBlocks, 
+        coverImage: file,  // Use the new file directly for upload
+      });
     }
   };
+  
 
-  // const handleFormChange = useCallback((e, index) => {
-  //   const newContentBlocks = [...contentBlocks];
-  //   newContentBlocks[index] = e.target.value; // Update the specific block
-  //   setContentBlocks(newContentBlocks);
-
-  //   if (e.target.name == 'content') {
-  //     editSelectedNote(e.target.name, newContentBlocks.join('\n')); // Join blocks into content string
-  //   }
-
-  //   editSelectedNote(e.target.name, e.target.value); // Join blocks into content string
-  // }, [contentBlocks]);
   const handleFormChange = useCallback(
     (e, index) => {
       const newContentBlocks = [...contentBlocks];
@@ -88,12 +79,6 @@ const SelectedNote = () => {
     },
     [contentBlocks]
   );
-
-  //const handleFormChange = useCallback((e) => {
-  // editSelectedNote(e.target.name, e.target.value);
-  //     });
-
-  // Add a new block based on selected type
   const addNewBlock = (index) => {
     const newBlocks = [...contentBlocks];
     newBlocks.splice(index + 1, 0, blockType === "normal" ? "" : ""); // Add an empty block
@@ -101,9 +86,26 @@ const SelectedNote = () => {
     setShowPopup({ show: false, index: null }); // Close the popup after adding a block
   };
 
-  const handleAddBlockClick = (index) => {
-    setShowPopup({ show: true, index });
+  // const handleAddBlockClick = (index) => {
+  //   setShowPopup({ show: true, index });
+  // };
+  // const handleAddBlockClick = (index, event) => {
+  //   const buttonRect = event.target.getBoundingClientRect(); // Get button position
+  //   setShowPopup({
+  //     show: true,
+  //     index,
+  //     position: { top: buttonRect.bottom + window.scrollY, left: buttonRect.left + window.scrollX }, // Add position info
+  //   });
+  // };
+  const handleAddBlockClick = (index, event) => {
+    const { top, left, height } = event.target.getBoundingClientRect(); // Get button position
+    setShowPopup({
+      show: true,
+      index,
+      position: { top: top + height, left }, // Position popup below the button
+    });
   };
+  
 
   const handleSelect = (type, index) => {
     if (type === "normal") {
@@ -112,7 +114,7 @@ const SelectedNote = () => {
       createNewNote(); // Create a new note when "Note Block" is selected
     }
     // Close the popup after selecting an option
-    setShowPopup({ show: false, index: null });
+    setShowPopup({ show: false, index: null, position: { top: 0, left: 0 }});
   };
 
   // Function to create a new note
@@ -227,10 +229,10 @@ const SelectedNote = () => {
           {contentBlocks.map((block, index) => (
             <div key={index} className={styles.blockContainer}>
               <button
-                onClick={() => handleAddBlockClick(index)}
+                onClick={() => handleAddBlockClick(index, event)}
                 className={styles.addButton}
               >
-                +
+                <IoIosAdd />
               </button>
               <Editor
                 value={block}
@@ -241,7 +243,7 @@ const SelectedNote = () => {
                 ref={index === 0 ? contentRef : null}
               />
               {showPopup.show && showPopup.index === index && (
-                <PopupMenu onSelect={(type) => handleSelect(type, index)} /> // Show PopupMenu for the correct block
+                <PopupMenu onSelect={(type) => handleSelect(type, index)} position={showPopup.position} /> // Show PopupMenu for the correct block
               )}
             </div>
           ))}

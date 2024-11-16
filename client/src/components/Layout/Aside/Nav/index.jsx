@@ -11,9 +11,17 @@ import styles from "./index.module.scss";
 
 const Nav = () => {
   const navigate = useNavigate();
-  const { notes = [], favoriteNotes = [], selectedNote } = useNoteContext();
+  const {
+    notes = [],
+    favoriteNotes = [],
+    sharedNotes = [],
+    selectedNote,
+  } = useNoteContext();
   const { createNote, loadMoreNotes, hasMoreNotes } = useNote();
 
+  console.log("favor", favoriteNotes);
+  console.log("shared", sharedNotes);
+  const [showShared, setShowShared] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [showNotes, setShowNotes] = useState(true);
   const [needToNavigate, setNeedToNavigate] = useState(false);
@@ -24,7 +32,6 @@ const Nav = () => {
     setShowNotes(true);
     setNeedToNavigate(true);
   };
-
   // Load more notes when "Load More" button is clicked
   // const handleLoadMore = async () => {
   //   await loadMoreNotes();
@@ -57,6 +64,30 @@ const Nav = () => {
           </div>
         )}
 
+        {sharedNotes.length > 0 && (
+          <ul className={styles.list}>
+            <div
+              onClick={() => setShowShared((prevState) => !prevState)}
+              className={styles.list_header}
+            >
+              <div
+                className={`${styles.icon_wrapper} ${
+                  showShared ? styles.icon_open : undefined
+                }`}
+              >
+                <FaAngleRight />
+              </div>
+              <p>Share Notes:</p>
+            </div>
+            {showShared && (
+              <NavDragContainer
+                containerType="shared"
+                notes={sharedNotes}
+                selectedNote={selectedNote}
+              />
+            )}
+          </ul>
+        )}
         {/* If there are favorite notes, show them */}
         {favoriteNotes.length > 0 && (
           <ul className={styles.list}>

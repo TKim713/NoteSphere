@@ -9,8 +9,13 @@ import { AiOutlineMore } from "react-icons/ai";
 import styles from "./index.module.scss";
 
 const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
-  const { sortNormalNotes, sortFavoriteNotes, loadMoreNotes, hasMoreNotes } =
-    useNote();
+  const {
+    sortNormalNotes,
+    sortFavoriteNotes,
+    loadMoreNotes,
+    hasMoreNotes,
+    sortSharedNotes,
+  } = useNote();
   const dragId = useRef(null);
   const dragStartingIndex = useRef(null);
 
@@ -37,7 +42,9 @@ const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
 
   const handleDrop = (e) => {
     if (dragStartingIndex !== currentDragIndex) {
-      if (containerType === "favorite") {
+      if (containerType === "shared") {
+        sortSharedNotes(dragId.current, currentDragIndex);
+      } else if (containerType === "favorite") {
         sortFavoriteNotes(dragId.current, currentDragIndex);
       } else {
         sortNormalNotes(dragId.current, currentDragIndex);
@@ -85,6 +92,7 @@ const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
               emoji={note.emoji}
               title={note.title}
               isFavorite={containerType === "favorite" || note.isFavorite}
+              isShared={containerType === "shared" || note.isShared}
               ellipsisClassName={styles.ellipsis}
             />
           </div>
@@ -114,9 +122,11 @@ const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
             )}
         </li>
       ))}
-      {containerType !== "favorite" && hasMoreNotes && (
+      {containerType !== "favorite" && containerType !== "shared" && hasMoreNotes && (
         <li className={styles.loadMoreItem} onClick={loadMoreNotes}>
-          <div className={styles.icon}><AiOutlineEllipsis /></div>
+          <div className={styles.icon}>
+            <AiOutlineEllipsis />
+          </div>
           <p>More</p>
         </li>
       )}

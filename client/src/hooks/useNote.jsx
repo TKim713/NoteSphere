@@ -10,6 +10,7 @@ export const useNote = () => {
   const {
     notes = [],
     favoriteNotes = [],
+    sharedNotes = [],
     selectedNote,
     dispatch,
     editingValue,
@@ -32,6 +33,7 @@ export const useNote = () => {
         title: "",
         emoji: "",
         isFavorite: false,
+        isShared: false,
         index: notes.length,
         favoriteIndex: null,
       };
@@ -54,7 +56,7 @@ export const useNote = () => {
         body,
         config
       );
-      // setSelectedNote(newNote.id);//tu dong chuyen sang note moi tao
+      setSelectedNote(newNote.id); //tu dong chuyen sang note moi tao
       dispatch({
         type: "SET_SELECTED_HEADER",
         payload: { ...newNote, content: null },
@@ -68,22 +70,27 @@ export const useNote = () => {
   const loadMoreNotes = async () => {
     if (isLoading) return; // Prevent multiple simultaneous requests
     setIsLoading(true);
-  
+
     try {
       const skip = currentPage * 10; // Skip notes already loaded
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/notes`, {
-        params: { skip, limit: 10 },
-      });
-  
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/notes`,
+        {
+          params: { skip, limit: 10 },
+        }
+      );
+
       const newNotes = response.data.data;
       const updatedNotes = [
         ...notes,
-        ...newNotes.filter((note) => !notes.some((existingNote) => existingNote.id === note.id)),
+        ...newNotes.filter(
+          (note) => !notes.some((existingNote) => existingNote.id === note.id)
+        ),
       ];
-  
+
       // Dispatch the updated notes list
       dispatch({ type: "UPDATE_NORMAL_NOTES", payload: updatedNotes });
-  
+
       setCurrentPage((prevPage) => prevPage + 1);
       setHasMoreNotes(response.data.hasMore);
       setIsLoading(false);
@@ -93,8 +100,35 @@ export const useNote = () => {
       setIsLoading(false);
     }
   };
-  
-  
+  const sharedNote = async () => {
+    if (isLoading) return; // Prevent multiple simultaneous requests
+    setIsLoading(true);
+
+    try {
+      const skip = currentPage * 10; // Skip notes already loaded
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/notes`,
+        {
+          params: { skip, limit: 10 },
+        }
+      );
+
+      const newNotes = response.data.data;
+      const sharedNotes = newNotes.filter((note) => note.isShared); // Filter notes where isShared is true
+
+      // Assuming you're dispatching the action to store shared notes
+      dispatch({ type: "UPDATE_SHARED_NOTES", payload: sharedNotes });
+
+      setCurrentPage((prevPage) => prevPage + 1);
+      setHasMoreNotes(response.data.hasMore);
+      setIsLoading(false);
+    } catch (err) {
+      console.error(err.message);
+      setError(err);
+      setIsLoading(false);
+    }
+  };
+
   const renderLoadMoreButton = !isLoading && notes.length >= 10 && hasMoreNotes;
 
   const setSelectedNote = async (id) => {
@@ -140,7 +174,6 @@ export const useNote = () => {
       payload: { key, value },
     });
   };
-
   const saveSelectedChanges = async ({
     id,
     title,
@@ -149,65 +182,77 @@ export const useNote = () => {
     coverImage,
   }) => {
     setError(null);
-
+  
     try {
-      // const updatedNotes = [...notes];
+      // Clone existing notes arrays to ensure we're not directly mutating the state
       const updatedNotes = Array.isArray(notes) ? [...notes] : [];
-
       const updatedFavoriteNotes = [...favoriteNotes];
-      const currentSelectedNote = { ...selectedNote, coverImage }; // Giữ lại coverImage ở đây
-
-      // Cập nhật lại currentSelectedNote
+      const updatedSharedNotes = [...sharedNotes];
+  
+      const currentSelectedNote = { ...selectedNote, coverImage };
+  
+      // Update the main notes list
       const existingNormalNoteIndex = notes.findIndex((note) => note.id === id);
       updatedNotes.splice(existingNormalNoteIndex, 1, currentSelectedNote);
-
+  
+      // Only update favoriteNotes if this note is in the favorites
       const existingFavoriteNoteIndex = favoriteNotes.findIndex(
         (note) => note.id === id
       );
-
       if (existingFavoriteNoteIndex >= 0) {
         updatedFavoriteNotes.splice(existingFavoriteNoteIndex, 1, {
           id: currentSelectedNote.id,
           title: currentSelectedNote.title,
           emoji: currentSelectedNote.emoji,
-          coverImage,
+          coverImage: currentSelectedNote.coverImage,
         });
       }
-
+  
+      // Only update sharedNotes if this note is in the shared notes
+      const existingSharedNoteIndex = sharedNotes.findIndex(
+        (note) => note.id === id
+      );
+      if (existingSharedNoteIndex >= 0) {
+        updatedSharedNotes.splice(existingSharedNoteIndex, 1, {
+          id: currentSelectedNote.id,
+          title: currentSelectedNote.title,
+          emoji: currentSelectedNote.emoji,
+          coverImage: currentSelectedNote.coverImage,
+        });
+      }
+  
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("emoji", emoji);
+      formData.append("content", content);
+      if (coverImage instanceof File) {
+        formData.append("coverImage", coverImage);
+      }
+  
+      // Make the API request to save the changes
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/notes/${id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+  
+      // Dispatch to update the global state with the new data
       dispatch({
         type: "SAVE_SELECTED_CHANGES",
         payload: {
           notes: updatedNotes,
           favoriteNotes: updatedFavoriteNotes,
+          sharedNotes: updatedSharedNotes,
           content,
-          coverImage, // Đảm bảo coverImage cũng có mặt ở payload
+          coverImage, // Ensure coverImage is included in the payload
         },
       });
-
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-
-      const body = JSON.stringify({
-        title,
-        emoji,
-        content,
-        coverImage,
-      });
-
-      await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/notes/${id}`,
-        body,
-        config
-      );
     } catch (err) {
       console.error(err.message);
       setError(err);
     }
   };
-
   const setEditingValue = (payload) => {
     dispatch({ type: "SET_EDITING_VALUE", payload });
   };
@@ -399,6 +444,26 @@ export const useNote = () => {
       config
     );
   };
+  const sortSharedNotes = (id, newIndex) => {
+    // Lọc các ghi chú khác ngoài ghi chú có id tương ứng
+    const notesToUpdate = sharedNotes.filter((note) => note.id !== id);
+
+    // Thêm ghi chú vào vị trí mới
+    notesToUpdate.splice(
+      newIndex,
+      0,
+      notes.find((note) => note.id === id)
+    );
+
+    // Cập nhật lại chỉ số (index) của các ghi chú
+    const updatedNotes = notesToUpdate.map((note, index) => ({
+      ...note,
+      index,
+    }));
+
+    // Dispatch action cập nhật state trong Redux
+    dispatch({ type: "SORT_SHARED_NOTES", payload: updatedNotes });
+  };
 
   const sortFavoriteNotes = async (id, newIndex) => {
     const notesToUpdate = favoriteNotes.filter((note) => note.id !== id);
@@ -586,11 +651,13 @@ export const useNote = () => {
     editSelectedNote,
     saveSelectedChanges,
     favoriteNote,
+    sharedNote,
     unfavoriteNote,
     duplicateNote,
     deleteNote,
     sortNormalNotes,
     sortFavoriteNotes,
+    sortSharedNotes,
     setEditingValue,
     updateEditingValue,
     saveEditingValue,
