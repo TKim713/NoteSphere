@@ -13,7 +13,8 @@ import {
   reorderFavoriteList,
   searchNotes,
   changePermissionController,
-  getSharedUsers
+  getSharedUsers,
+  uploadContentImage
 } from "../controllers/noteController.js";
 
 import { checkAuth } from "../middlewares/checkAuth.js";
@@ -28,6 +29,7 @@ router.get("/:noteId/sharedUsers", checkAuth, getSharedUsers);
 router.put("/sortNormalList", checkAuth, reorderNormalList);
 router.put("/sortFavoriteList", checkAuth, reorderFavoriteList);
 router.put("/:noteId", checkAuth, upload.single("coverImage"), editNote);
+router.put("/:noteId/uploadContentImage", checkAuth, upload.single("contentImage"), uploadContentImage);
 router.put("/:noteId/favorite", checkAuth, addNoteToFavorites);
 router.put("/:noteId/unfavorite", checkAuth, removeNoteFromFavorites);
 router.put("/:noteId/changePermission", checkAuth, changePermissionController);

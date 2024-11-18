@@ -11,7 +11,8 @@ import {
   sortFavoriteList,
   fetchNotesByTitle,
   changePermission,
-  fetchSharedUsers
+  fetchSharedUsers,
+  saveContentImageToNote
 } from "../services/noteService.js";
 
 export const getNote = async (req, res, next) => {
@@ -183,6 +184,24 @@ export const getSharedUsers = async (req, res, next) => {
     const sharedUsers = await fetchSharedUsers(noteId, userId);
 
     res.json(sharedUsers);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+export const uploadContentImage = async (req, res, next) => {
+  try {
+    const { noteId } = req.params;
+    const userId = req.user.id;
+    const file = req.file ? req.file : null;
+
+    if (!file) {
+      return res.status(400).json({ message: "No file provided for content image upload." });
+    }
+
+    const contentImageUrl = await saveContentImageToNote(noteId, userId, file);
+
+    res.json({ message: "Content image uploaded successfully", contentImageUrl });
   } catch (err) {
     return next(err);
   }
