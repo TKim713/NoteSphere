@@ -1,13 +1,21 @@
-import { useState, useRef } from 'react';
+import { useState, useRef } from "react";
 
-import { useNote } from 'hooks/useNote';
+import { useNote } from "hooks/useNote";
 
-import NavElement from './NavElement';
+import NavElement from "./NavElement";
+import { AiOutlineEllipsis } from "react-icons/ai";
+import { AiOutlineMore } from "react-icons/ai";
 
-import styles from './index.module.scss';
+import styles from "./index.module.scss";
 
 const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
-  const { sortNormalNotes, sortFavoriteNotes } = useNote();
+  const {
+    sortNormalNotes,
+    sortFavoriteNotes,
+    loadMoreNotes,
+    hasMoreNotes,
+    sortSharedNotes,
+  } = useNote();
   const dragId = useRef(null);
   const dragStartingIndex = useRef(null);
 
@@ -15,7 +23,9 @@ const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
 
   const [currentDragIndex, setCurrentDragIndex] = useState(null);
   const [highlightIndex, setHighlightIndex] = useState(null);
-
+  const handleLoadMore = async () => {
+    await loadMoreNotes();
+  };
   const handleDragStart = (e, index) => {
     setActiveDragContainer(containerType);
 
@@ -32,7 +42,9 @@ const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
 
   const handleDrop = (e) => {
     if (dragStartingIndex !== currentDragIndex) {
-      if (containerType === 'favorite') {
+      if (containerType === "shared") {
+        sortSharedNotes(dragId.current, currentDragIndex);
+      } else if (containerType === "favorite") {
         sortFavoriteNotes(dragId.current, currentDragIndex);
       } else {
         sortNormalNotes(dragId.current, currentDragIndex);
@@ -79,7 +91,8 @@ const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
               to={`/notes/${note.id}`}
               emoji={note.emoji}
               title={note.title}
-              isFavorite={containerType === 'favorite' || note.isFavorite}
+              isFavorite={containerType === "favorite" || note.isFavorite}
+              isShared={containerType === "shared" || note.isShared}
               ellipsisClassName={styles.ellipsis}
             />
           </div>
@@ -98,9 +111,9 @@ const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
                   e.preventDefault();
                 }}
                 style={{
-                  top: index < dragStartingIndex.current ? '-1.4rem' : 'auto',
+                  top: index < dragStartingIndex.current ? "-1.4rem" : "auto",
                   bottom:
-                    index > dragStartingIndex.current ? '-1.4rem' : 'auto',
+                    index > dragStartingIndex.current ? "-1.4rem" : "auto",
                   opacity: highlightIndex === index ? 1 : 0,
                 }}
               >
@@ -109,6 +122,14 @@ const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
             )}
         </li>
       ))}
+      {containerType !== "favorite" && containerType !== "shared" && hasMoreNotes && (
+        <li className={styles.loadMoreItem} onClick={loadMoreNotes}>
+          <div className={styles.icon}>
+            <AiOutlineEllipsis />
+          </div>
+          <p>More</p>
+        </li>
+      )}
     </div>
   );
 };

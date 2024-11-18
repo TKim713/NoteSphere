@@ -36,6 +36,19 @@
       }
     }
   }
+  .loadMoreItem {
+    display: flex;
+    padding: 0.5rem 2.95rem;
+    color: $color-lg;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1.05rem;
+  }
+
+  .icon {
+    font-size: 1.5rem;
+  }
 
   .isSelected {
     background: $background-primary-h;

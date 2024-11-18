@@ -20,6 +20,7 @@ const NavElement = ({
   emoji,
   title,
   isFavorite,
+  isShared,
   ellipsisClassName,
 }) => {
   const emojiRef = useRef(null);
@@ -128,6 +129,7 @@ const NavElement = ({
         <NavElementMenu
           id={id}
           isFavorite={isFavorite}
+          isShared={isShared}
           closeMenu={() => setShowNavMenu(false)}
           openEditModal={handleOpenEditModal}
         />

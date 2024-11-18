@@ -17,7 +17,7 @@ import User from "../../../../../../server/models/User";
 import { useAuthContext } from "../../../../hooks/useAuthContext";
 
 const Header = ({ selectedNote }) => {
-  const { favoriteNote, unfavoriteNote } = useNote();
+  const { favoriteNote, unfavoriteNote, sharedNote } = useNote();
   const { user } = useAuthContext();
   const [editMenuPosition, setEditMenuPosition] = useState(null);
   const [showEditMenu, setShowEditMenu] = useState(false);
@@ -101,7 +101,7 @@ const Header = ({ selectedNote }) => {
                 {selectedNote.emoji || `\u{1F5CB}`}
               </div>
               <p className={styles.title}>
-                {selectedNote.title.length > 0
+                {selectedNote && selectedNote.title && selectedNote.title.length > 0
                   ? selectedNote.title
                   : "Untitled"}
               </p>

@@ -18,13 +18,13 @@ const Main = () => {
   // TODO: polish this
   useEffect(() => {
     if (pathname === '/') {
-      if (notes.length > 0) {
+      if (notes && notes.length > 0) {
         navigate(`/notes/${notes[0].id}`);
       } else {
         navigate(`/notes/getting-started`);
       }
     } else if (!isFirstRender && !selectedNote) {
-      if (notes.length > 0) {
+      if (notes && notes.length > 0) {
         navigate(`/notes/${notes[0].id}`);
       } else {
         navigate(`/notes/getting-started`);
@@ -34,7 +34,7 @@ const Main = () => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
     }
-  }, [selectedNote, pathname]);
+  }, [selectedNote, pathname, notes, navigate]);
 
   return (
     <div className={styles.container}>

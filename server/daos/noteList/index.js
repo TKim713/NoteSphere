@@ -8,8 +8,6 @@ switch (daoOption) {
   case 'MONGOOSE':
     NoteListDao = new NoteListMongooseDao();
     break;
-  case 'FIREBASE':
-    break;
   default:
     NoteListDao = new NoteListMongooseDao();
 }

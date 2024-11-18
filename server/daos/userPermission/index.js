@@ -8,8 +8,6 @@ switch (daoOption) {
   case 'MONGOOSE':
     UserPermissionDao = new UserPermissionMongooseDao();
     break;
-  case 'FIREBASE':
-    break;
   default:
     UserPermissionDao = new UserPermissionMongooseDao();
 }
