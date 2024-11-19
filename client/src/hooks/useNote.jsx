@@ -174,7 +174,7 @@ export const useNote = () => {
       payload: { key, value },
     });
   };
-  const saveSelectedChanges = async ({
+const saveSelectedChanges = async ({
     id,
     title,
     emoji,
@@ -225,7 +225,17 @@ export const useNote = () => {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("emoji", emoji);
-      formData.append("content", content);
+  
+      // Ensure content is always an array
+      if (Array.isArray(content)) {
+        content.forEach((block, index) => {
+          formData.append(`content[${index}]`, block);
+        });
+      } else {
+        // If content is not an array, just store it as a single entry
+        formData.append("content", content);
+      }
+  
       if (coverImage instanceof File) {
         formData.append("coverImage", coverImage);
       }
@@ -244,7 +254,7 @@ export const useNote = () => {
           notes: updatedNotes,
           favoriteNotes: updatedFavoriteNotes,
           sharedNotes: updatedSharedNotes,
-          content,
+          content, // Ensure content is included correctly
           coverImage, // Ensure coverImage is included in the payload
         },
       });
