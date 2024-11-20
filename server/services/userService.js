@@ -41,7 +41,9 @@ export const signup = async (userDetails) => {
 
   const payload = { user: { id: newUser.id } };
 
-  const verificationUrl = `http://localhost:5173/email-verification/${verificationToken}`;
+  // const verificationUrl = `http://localhost:5173/email-verification/${verificationToken}`;
+  const verificationUrl = `http://localhost:5173/email-verification?token=${verificationToken}`;
+
   await sendEmail(
     email,
     'Verify your email',

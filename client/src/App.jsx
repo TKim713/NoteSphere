@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 import {
   createRoutesFromElements,
@@ -6,21 +6,21 @@ import {
   Route,
   RouterProvider,
   Navigate,
-} from 'react-router-dom';
+} from "react-router-dom";
 
-import { useAuth } from 'hooks/useAuth';
-import { useAuthContext } from 'hooks/useAuthContext';
-import { useNoteContext } from 'hooks/useNoteContext';
+import { useAuth } from "hooks/useAuth";
+import { useAuthContext } from "hooks/useAuthContext";
+import { useNoteContext } from "hooks/useNoteContext";
 
-import Layout from './components/Layout';
-import ProtectedRoutes from './components/ProtectedRoutes';
-import LogIn from './pages/LogIn';
-import SignUp from './pages/SignUp';
-import EmailVerification from './pages/EmailVerification';
-import Note from './pages/Note';
-import Home from './pages/Home';
+import Layout from "./components/Layout";
+import ProtectedRoutes from "./components/ProtectedRoutes";
+import LogIn from "./pages/LogIn";
+import SignUp from "./pages/SignUp";
+import EmailVerification from "./pages/EmailVerification";
+import Note from "./pages/Note";
+import Home from "./pages/Home";
 
-import './App.scss';
+import "./App.scss";
 
 function App() {
   const { loadUser } = useAuth();
@@ -36,10 +36,11 @@ function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
+        <Route path="/email-verification" element={<EmailVerification />} />
         <Route element={<ProtectedRoutes />}>
           <Route path="/login" element={<LogIn />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/email-verification/:token" element={<EmailVerification />} />
+          {/* <Route path="/email-verification/:token" element={<EmailVerification />} /> */}
         </Route>
 
         <Route element={<ProtectedRoutes needAuth />}>
