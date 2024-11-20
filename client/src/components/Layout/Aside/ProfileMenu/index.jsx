@@ -22,7 +22,10 @@ const ProfileMenu = ({ close }) => {
         <div className={styles.profile}>
           <div className={styles.email}>{email}</div>
           <div onClick={close} className={styles.details}>
-            <img src={USER.imageUrl} alt="" />
+            {/* <img src={USER.imageUrl} alt="" /> */}
+            <div className={styles.userAvatar}>
+            {name.charAt(0).toUpperCase()}
+          </div>
             <p>{`${name}'s Note App`}</p>
           </div>
         </div>

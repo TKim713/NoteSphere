@@ -3,10 +3,11 @@
   background: $background-modal;
   border-radius: 0.4rem;
   user-select: none;
-  min-width: 29rem;
-  max-width: 36rem;
+  min-width: 38rem;
+  // max-width: 38rem;
   padding: 1rem;
   z-index: 1000;
+  margin-right: 1rem;
 
   .header {
     h2 {
@@ -23,12 +24,17 @@
       display: flex;
       align-items: center;
       gap: 1rem;
+      padding: 1rem 0;
 
+      li {
+        display: flex;
+        gap: 1rem;
+      }
       .userAvatar {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 3.2rem;
+        width: 3.5rem;
         height: 3.2rem;
         border-radius: 50%;
         background-color: $background-button;
@@ -40,10 +46,21 @@
       .userDetails {
         display: flex;
         align-items: center;
+        width: 100%; // Đảm bảo phần tử con chiếm hết chiều rộng
+        justify-content: space-between; // Căn đều giữa các phần tử
         gap: 0.5rem;
 
         p {
           margin: 0;
+          flex: 1; // Đẩy đoạn văn sang bên trái
+        }
+
+        .permissionSelect {
+          margin-left: auto; // Đẩy select sang bên phải
+          border-radius: 0.4rem;
+          border: none;
+          background-color: $background-modal;
+          color: white;
         }
       }
     }
@@ -89,15 +106,6 @@
           }
         }
       }
-    }
-
-    .permissionSelect {
-      padding: 0.5rem;
-      border-radius: 0.4rem;
-      border: none;
-      background-color: $background-modal;
-      color: white;
-      width: 80px;
     }
   }
 }

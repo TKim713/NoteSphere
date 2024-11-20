@@ -139,7 +139,7 @@
       .addButton {
         display: flex;
         margin-right: 0.5rem;
-        align-items: center;
+        // align-items: center;
         justify-content: center;
         visibility: hidden; // Initially hide the button
         background-color: transparent;
@@ -149,7 +149,7 @@
         cursor: pointer;
         color: $color-light; // Ensure this variable is defined
         transition: border-color 0.3s ease; // Smooth transition for border color
-
+        height: 2.4rem;
         // Highlight the button when the block is hovered
         &:hover {
           background-color: $background-primary-h; // Highlight border color

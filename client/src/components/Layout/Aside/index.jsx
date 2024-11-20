@@ -27,17 +27,26 @@ const Aside = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [profileMenuPosition, setProfileMenuPosition] = useState(null);
 
+  // const handleOpenProfileMenu = (e) => {
+  //   e.preventDefault();
+  //   const headerRect = e.currentTarget.getBoundingClientRect();
+  //   const imgRect = e.currentTarget
+  //     .querySelector('img')
+  //     .getBoundingClientRect();
+  //   const modalTop = headerRect.bottom;
+  //   const modalLeft = imgRect.left;
+  //   setProfileMenuPosition({ top: modalTop, left: modalLeft });
+  //   setShowProfileMenu(true);
+  // };
   const handleOpenProfileMenu = (e) => {
     e.preventDefault();
     const headerRect = e.currentTarget.getBoundingClientRect();
-    const imgRect = e.currentTarget
-      .querySelector('img')
-      .getBoundingClientRect();
     const modalTop = headerRect.bottom;
-    const modalLeft = imgRect.left;
+    const modalLeft = headerRect.left; // Lấy vị trí của toàn bộ `header`
     setProfileMenuPosition({ top: modalTop, left: modalLeft });
     setShowProfileMenu(true);
   };
+  
 
   return (
     <>
@@ -60,7 +69,10 @@ const Aside = () => {
       </Modal>
       <aside className={styles.container}>
         <header onClick={handleOpenProfileMenu} className={styles.header}>
-          <img src={USER.imageUrl} alt={user.name} />{' '}
+          {/* <img src={USER.imageUrl} alt={user.name} />{' '} */}
+          <div className={styles.userAvatar}>
+            {user.name.charAt(0).toUpperCase()}
+          </div>
           <p>{`${user.name}'s Note App`}</p>{' '}
         </header>
         <ul className={styles.controls}>
