@@ -16,6 +16,7 @@ import Layout from './components/Layout';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import LogIn from './pages/LogIn';
 import SignUp from './pages/SignUp';
+import EmailVerification from './pages/EmailVerification';
 import Note from './pages/Note';
 import Home from './pages/Home';
 
@@ -38,6 +39,7 @@ function App() {
         <Route element={<ProtectedRoutes />}>
           <Route path="/login" element={<LogIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/email-verification/:token" element={<EmailVerification />} />
         </Route>
 
         <Route element={<ProtectedRoutes needAuth />}>

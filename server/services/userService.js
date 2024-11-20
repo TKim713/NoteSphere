@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto-browserify';
 
+import { sendEmail } from './emailService.js';
 import UserDao from '../daos/user/index.js';
 import NoteListDao from '../daos/noteList/index.js';
 import CustomError from '../models/CustomError.js';
@@ -23,11 +25,14 @@ export const signup = async (userDetails) => {
 
   const encryptedPassword = await bcrypt.hash(password, salt);
 
+  const verificationToken = crypto.randomBytes(32).toString('hex')
+
   const newUser = await UserDao.create({
     name,
     lastName,
     email,
     password: encryptedPassword,
+    verificationToken
   });
 
   await NoteListDao.create({
@@ -35,6 +40,14 @@ export const signup = async (userDetails) => {
   });
 
   const payload = { user: { id: newUser.id } };
+
+  const verificationUrl = `http://localhost:5173/email-verification/${verificationToken}`;
+  await sendEmail(
+    email,
+    'Verify your email',
+    `Click the link to verify your email: ${verificationUrl}`,
+    `<a href="${verificationUrl}">Verify Email</a>`
+  );
 
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '365d' });
 };
@@ -46,6 +59,10 @@ export const login = async (userDetails) => {
 
   if (!existingUser) {
     throw new CustomError('A user with that email does not exist.', 400);
+  }
+
+  if (!existingUser.isVerified) {
+    throw new CustomError('Please verify your email before logging in.', 403);
   }
 
   const isMatch = await bcrypt.compare(password, existingUser.password);

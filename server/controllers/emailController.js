@@ -1,16 +1,15 @@
 import CustomError from '../models/CustomError.js';
+import UserDao from '../daos/user/index.js';
 import { sendEmail, assignPermission } from '../services/emailService.js';
 
 export const shareNote = async (req, res, next) => {
     const { email, noteId, noteTitle, senderName, permission } = req.body;
 
-    const sharedByUserId = req.user?.id;
-
     if (!email || !noteId || !noteTitle || !senderName || !permission) {
         return next(new CustomError('All fields are required', 400));
     }
 
-    const noteUrl = `http://localhost:5173/notes/${noteId}?permission=${permission}`;
+    const noteUrl = `http://localhost:5173/notes/${noteId}`;
 
     const subject = `${senderName} has invited you to view a note`;
     const text = `Take a look at ${noteTitle} (note name).
@@ -35,3 +34,27 @@ export const shareNote = async (req, res, next) => {
         next(new CustomError('Failed to send email or assign permission', 500));
     }
 };
+
+export const verifyEmail = async (req, res, next) => {
+    try {
+      const { token } = req.query;
+  
+      if (!token) {
+        throw new CustomError('Token is missing.', 400);
+      }
+  
+      const user = await UserDao.fetchByVerificationToken(token);
+  
+      if (!user) {
+        throw new CustomError('Invalid or expired token.', 400);
+      }
+  
+      user.isVerified = true;
+      user.verificationToken = null;
+      await user.save();
+  
+      res.json({ message: 'Email verified successfully!' });
+    } catch (err) {
+      next(err);
+    }
+  };  

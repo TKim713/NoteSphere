@@ -76,9 +76,9 @@ export const useAuth = () => {
         config
       );
 
-      localStorage.setItem('token', res.data.token);
+      // localStorage.setItem('token', res.data.token);
 
-      await loadUser();
+      // await loadUser();
 
       setIsLoading(false);
     } catch (err) {

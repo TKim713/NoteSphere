@@ -192,7 +192,7 @@ const ShareModal = ({ close, noteId, noteTitle, noteContent, token }) => {
     }
 
     try {
-      const response = await fetch(`${apiUrl}/api/share`, {
+      const response = await fetch(`${apiUrl}/api/email/share`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

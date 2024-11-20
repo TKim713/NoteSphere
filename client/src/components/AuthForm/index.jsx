@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaTimesCircle } from 'react-icons/fa';
 
 import { useAuth } from 'hooks/useAuth';
 
+import PopupModal from '../Layout/Main/PopupModal';
 import styles from './index.module.scss';
 
 const AuthForm = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const isLogin = pathname === '/login';
 
   const { signup, login, error } = useAuth();
@@ -19,6 +21,8 @@ const AuthForm = () => {
     password: '',
     confirmPassword: '',
   });
+
+  const [modalVisible, setModalVisible] = useState(false);
 
   const { name, lastName, email, password, confirmPassword } = userInput;
 
@@ -46,7 +50,13 @@ const AuthForm = () => {
       });
     } else {
       await signup(userInput);
+      setModalVisible(true);
     }
+  };
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+    navigate('/login');
   };
 
   return (
@@ -181,6 +191,10 @@ const AuthForm = () => {
           </div>
         </form>
       </main>
+
+      <PopupModal isVisible={modalVisible} onClose={handleModalClose}>
+        <p>Signup successful! Please check your email for verification.</p>
+      </PopupModal>
     </div>
   );
 };
