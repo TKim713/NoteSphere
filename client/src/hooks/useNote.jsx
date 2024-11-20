@@ -135,38 +135,64 @@ export const useNote = () => {
     setIsLoading(true);
     try {
       const selectedNote = notes.find((note) => note.id === id);
-
+  
       dispatch({
         type: "SET_SELECTED_HEADER",
         payload: { ...selectedNote, content: null },
       });
-
+  
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/notes/${id}`
       );
-
-      dispatch({ type: "SET_SELECTED_CONTENT", payload: res.data.content });
-
+  
+      console.log(res.data); // Log dữ liệu trả về từ API
+  
+      const content = res.data.content;
+      let processedContent = [];
+  
+      if (Array.isArray(content)) {
+        processedContent = content.map((item) => {
+          console.log("item",item); // Kiểm tra từng item
+          // Kiểm tra nếu nội dung là text hoặc image
+          if (item.type === "text") {
+            return { type: "text", value: item.value };
+          } else if (item.type === "image") {
+            return { type: "image", value: item.value };
+          } else {
+            return item;  // fallback nếu có kiểu khác
+          }
+        });
+      } else {
+        // Nếu content không phải là array, chỉ có 1 item
+        console.log(content); // Kiểm tra content nếu không phải mảng
+        if (content.type === "text") {
+          processedContent = [{ type: "text", value: content.value }];
+        } else if (content.type === "image") {
+          processedContent = [{ type: "image", value: content.value }];
+        }
+      }
+  
+      // Cập nhật state với dữ liệu đã xử lý
+      dispatch({ type: "SET_SELECTED_CONTENT", payload: processedContent });
+  
       setIsLoading(false);
     } catch (err) {
       console.error(err.message);
       if (err.response.status === 404) {
-        // const updatedNotes = [...notes];
         const updatedNotes = Array.isArray(notes) ? [...notes] : [];
-
         const existingNoteIndex = notes.findIndex((note) => note.id === id);
-
         updatedNotes.splice(existingNoteIndex, 1);
-
+  
         dispatch({
           type: "NOTE_NOT_FOUND",
           payload: updatedNotes,
         });
       }
-
       setIsLoading(false);
     }
   };
+  
+  
 
   const editSelectedNote = (key, value) => {
     dispatch({
@@ -174,7 +200,8 @@ export const useNote = () => {
       payload: { key, value },
     });
   };
-const saveSelectedChanges = async ({
+
+  const saveSelectedChanges = async ({
     id,
     title,
     emoji,
@@ -220,7 +247,8 @@ const saveSelectedChanges = async ({
           coverImage: currentSelectedNote.coverImage,
         });
       }
-  
+      console.log("Content to save:", content);
+
       // Create FormData for file upload
       const formData = new FormData();
       formData.append("title", title);
@@ -229,12 +257,15 @@ const saveSelectedChanges = async ({
       // Ensure content is always an array
       if (Array.isArray(content)) {
         content.forEach((block, index) => {
-          formData.append(`content[${index}]`, block);
+          // Add type and value to the block
+          formData.append(`content[${index}].type`, block.type);
+          formData.append(`content[${index}].value`, block.value);
         });
-      } else {
-        // If content is not an array, just store it as a single entry
-        formData.append("content", content);
+      } 
+      else {
+        formData.append("content", JSON.stringify(content)); // If not an array, send as a single entry
       }
+
   
       if (coverImage instanceof File) {
         formData.append("coverImage", coverImage);
@@ -259,10 +290,15 @@ const saveSelectedChanges = async ({
         },
       });
     } catch (err) {
-      console.error(err.message);
+      console.error("An error occurred during saveSelectedChanges:");
+      if (err.response) {
+        console.error("Response error:", err.response.data);
+      }      
       setError(err);
     }
+    
   };
+  
   const setEditingValue = (payload) => {
     dispatch({ type: "SET_EDITING_VALUE", payload });
   };

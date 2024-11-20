@@ -63,8 +63,13 @@ export const addNote = async ({
   noteId,
   title = "",
   emoji = "",
-  content = "",
+  content = [
+    {
+      "type": "text",
+      "value": ""
+    }]
 }) => {
+
   const newNote = {
     id: noteId,
     userId,
