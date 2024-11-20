@@ -5,15 +5,18 @@
   flex-direction: column;
 
   .header {
-    margin-bottom: 10rem;
+    margin-bottom: 4rem;
     position: relative;
     z-index: 1;
 
     .nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
       background: $background-primary;
       top: 0;
       position: fixed;
-      padding: 2rem;
+      padding: 1rem;
       max-width: 120rem;
       margin: 0 auto;
       width: 90%;
@@ -22,6 +25,15 @@
       transform: translateX(-50%);
       left: 50%;
       z-index: 1;
+      img {
+        display: block;
+      }
+
+      .divider {
+        width: 1px; /* Độ dày của đường */
+        height: 40px; /* Chiều dài của đường */
+        background-color: #ccc; /* Màu sắc của đường */
+      }
     }
   }
 

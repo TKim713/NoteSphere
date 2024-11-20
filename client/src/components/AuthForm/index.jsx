@@ -62,7 +62,16 @@ const AuthForm = () => {
   return (
     <div onSubmit={handleSubmit} className={styles.container}>
       <header className={styles.header}>
-        <div className={styles.nav}>Note</div>
+        {/* <div className={styles.nav}>Note</div> */}
+        <div className={styles.nav}>
+          <img
+            src="/logo.png"
+            alt="logo"
+            style={{ width: "50px", height: "50px" }}
+          />
+          <div className={styles.divider}></div>
+          <span>NoteSphere</span>
+        </div>
       </header>
       <main className={styles.main}>
         <form className={styles.form}>
