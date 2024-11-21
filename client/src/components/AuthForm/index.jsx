@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaTimesCircle } from 'react-icons/fa';
 
 import { useAuth } from 'hooks/useAuth';
 
+import PopupModal from '../Layout/Main/PopupModal';
 import styles from './index.module.scss';
 
 const AuthForm = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const isLogin = pathname === '/login';
 
   const { signup, login, error } = useAuth();
@@ -19,6 +21,8 @@ const AuthForm = () => {
     password: '',
     confirmPassword: '',
   });
+
+  const [modalVisible, setModalVisible] = useState(false);
 
   const { name, lastName, email, password, confirmPassword } = userInput;
 
@@ -46,13 +50,28 @@ const AuthForm = () => {
       });
     } else {
       await signup(userInput);
+      setModalVisible(true);
     }
+  };
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+    navigate('/login');
   };
 
   return (
     <div onSubmit={handleSubmit} className={styles.container}>
       <header className={styles.header}>
-        <div className={styles.nav}>Note</div>
+        {/* <div className={styles.nav}>Note</div> */}
+        <div className={styles.nav}>
+          <img
+            src="/logo.png"
+            alt="logo"
+            style={{ width: "50px", height: "50px" }}
+          />
+          <div className={styles.divider}></div>
+          <span>NoteSphere</span>
+        </div>
       </header>
       <main className={styles.main}>
         <form className={styles.form}>
@@ -181,6 +200,10 @@ const AuthForm = () => {
           </div>
         </form>
       </main>
+
+      <PopupModal isVisible={modalVisible} onClose={handleModalClose}>
+        <p>Signup successful! Please check your email for verification.</p>
+      </PopupModal>
     </div>
   );
 };
