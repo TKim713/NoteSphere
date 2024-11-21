@@ -32,6 +32,13 @@ const PopupMenu = forwardRef(({ onSelect, position }, ref) => {
             Note Block
           </li>{" "}
           {/* This triggers the note creation */}
+          <li
+          onClick={() => {
+            onSelect("delete");
+          }}
+          >
+            Delete Block
+        </li>
         </ul>
       </div>
     </div>
