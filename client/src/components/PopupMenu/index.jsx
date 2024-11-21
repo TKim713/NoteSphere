@@ -1,12 +1,13 @@
 // PopupMenu.jsx
-import { React, useState } from "react";
+import { forwardRef, React, useState } from "react";
 import styles from "./index.module.scss"; // Create this file for styling
 
-const PopupMenu = ({ onSelect, position }) => {
+const PopupMenu = forwardRef(({ onSelect, position }, ref) => {
   return (
     <div>
       {/* <div className={styles.popupMenu}> */}
       <div
+        ref={ref}
         style={{
           position: "absolute",
           top: position.top + "px",
@@ -35,6 +36,6 @@ const PopupMenu = ({ onSelect, position }) => {
       </div>
     </div>
   );
-};
+});
 
 export default PopupMenu;

@@ -63,8 +63,13 @@ export const addNote = async ({
   noteId,
   title = "",
   emoji = "",
-  content = "",
+  content = [
+    {
+      "type": "text",
+      "value": ""
+    }]
 }) => {
+
   const newNote = {
     id: noteId,
     userId,
@@ -148,4 +153,17 @@ export const changePermission = async (userId, noteId, sharedUserId, permission)
 export const fetchSharedUsers = async (noteId, userId, { limit = 5, skip = 0 } = {}) => {
   await checkForExistingNoteAndPermission(userId, noteId, 'All');
   return await UserPermissionDao.fetchSharedUsersByNoteId(noteId, { limit, skip });
+};
+
+export const saveContentImageToNote = async (noteId, userId, file) => {
+  await checkForExistingNoteAndPermission(userId, noteId, 'Edit');
+
+  const uploadResult = await NoteDao.uploadImageToCloudinary(file);
+
+  const newContentBlock = {
+    type: 'image',
+    value: uploadResult.secure_url,
+  };
+  const updatedContent = { $push: { content: newContentBlock } };
+  return await NoteDao.updateNote(noteId, updatedContent);
 };

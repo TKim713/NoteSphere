@@ -45,7 +45,7 @@ const Header = ({ selectedNote }) => {
     e.preventDefault();
     const elementRect = e.currentTarget.getBoundingClientRect();
     const modalTop = elementRect.bottom + 4;
-    const modalLeft = Math.min(elementRect.left, window.innerWidth - 300);
+    const modalLeft = Math.min(elementRect.left, window.innerWidth - 400);
     setShareModalPosition({ top: modalTop, left: modalLeft });
     setShowShareModal(true);
     // Log the selected note to ensure it's defined

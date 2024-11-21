@@ -227,6 +227,7 @@ const NoteProvider = ({ children }) => {
         dispatch({
           type: "LOAD_NOTES",
           payload: {
+            notesAreReady: true,
             normalListOrder: res.data.data,
             favoriteListOrder: res.data.data.filter((note) => note.isFavorite),
             sharedListOrder: res.data.data.filter((note) => note.isShared),
