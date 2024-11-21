@@ -138,6 +138,29 @@ const SelectedNote = () => {
     });
   };
   
+  const deleteBlock = (index) => {
+    // Create a new array without the deleted block
+    const updatedContentBlocks = contentBlocks.filter((_, i) => i !== index);
+    
+    // Update the state
+    setContentBlocks(updatedContentBlocks);
+    
+    // Update the backend
+    const token = localStorage.getItem("token"); // Retrieve token from localStorage
+    fetch(`${import.meta.env.VITE_API_URL}/api/notes/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-auth-token": token,
+      },
+      body: JSON.stringify({
+        content: updatedContentBlocks, // Send the updated content blocks
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => console.log("Block deleted:", data))
+      .catch((error) => console.error("Error deleting block:", error));
+  };  
 
   const handleSelect = (type, index) => {
     if (type === "normal") {
@@ -147,6 +170,8 @@ const SelectedNote = () => {
     } else if (type === "image") {
       setImageBlockIndex(index); // Set the index of the block where the image will go
       document.getElementById("imageInput").click(); // Trigger file input click
+    } else if (type === "delete") {
+      deleteBlock(index); // Trigger file input click
     }
     // Close the popup after selecting an option
     setShowPopup({ show: false, index: null, position: { top: 0, left: 0 } });
