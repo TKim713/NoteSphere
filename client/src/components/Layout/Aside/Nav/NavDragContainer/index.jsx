@@ -8,7 +8,7 @@ import { AiOutlineMore } from "react-icons/ai";
 
 import styles from "./index.module.scss";
 
-const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
+const NavDragContainer = ({ notes, selectedNote, containerType = null, isPageLoaded }) => {
   const {
     sortNormalNotes,
     sortFavoriteNotes,
@@ -122,14 +122,17 @@ const NavDragContainer = ({ notes, selectedNote, containerType = null }) => {
             )}
         </li>
       ))}
-      {containerType !== "favorite" && containerType !== "shared" && hasMoreNotes && (
-        <li className={styles.loadMoreItem} onClick={loadMoreNotes}>
-          <div className={styles.icon}>
-            <AiOutlineEllipsis />
-          </div>
-          <p>More</p>
-        </li>
-      )}
+      {containerType !== "favorite" &&
+        containerType !== "shared" &&
+        hasMoreNotes &&
+        notes.length >= 10 && isPageLoaded && (
+          <li className={styles.loadMoreItem} onClick={loadMoreNotes}>
+            <div className={styles.icon}>
+              <AiOutlineEllipsis />
+            </div>
+            <p>More</p>
+          </li>
+        )}
     </div>
   );
 };

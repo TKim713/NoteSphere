@@ -193,19 +193,19 @@ const SelectedNote = () => {
     if (file && imageBlockIndex !== null) {
       const newContentBlocks = [...contentBlocks];
       const imageUrl = URL.createObjectURL(file);
-
-      // Insert the image directly as an object with 'type' and 'src'
-      newContentBlocks[imageBlockIndex] = { type: "image", value: imageUrl };
+  
+      // Thêm block mới với hình ảnh sau block được chọn
+      newContentBlocks.splice(imageBlockIndex + 1, 0, { type: "image", value: imageUrl });
       setContentBlocks(newContentBlocks);
-      setImageBlockIndex(null); // Reset image block index after insertion
-
+      setImageBlockIndex(null); // Reset image block index sau khi thêm
+  
       // API Call for image block
       const formData = new FormData();
       formData.append("contentImage", file); // Attach the image file
-
+  
       // Replace 'yourAuthToken' with the actual token value you have
       const token = localStorage.getItem("token"); // or wherever you're storing it
-
+  
       fetch(`http://localhost:8080/api/notes/${id}/uploadContentImage`, {
         method: "PUT",
         headers: {
@@ -218,7 +218,7 @@ const SelectedNote = () => {
         .catch((error) => console.error("Error uploading image:", error));
     }
   };
-
+  
   // Show popup for the specific block where "+" was clicked
   useEffect(() => {
     if (isFirstRender.current) {
@@ -254,7 +254,7 @@ const SelectedNote = () => {
     };
   }, []);
   const headerPadding =
-    newCoverImage || coverImage ? "0 10rem 0" : "10rem 10rem 0";
+    newCoverImage || coverImage ? "0 10rem 0" : "5rem 10rem 0";
   return (
     <div className={styles.container}>
       <div className={styles.note}>

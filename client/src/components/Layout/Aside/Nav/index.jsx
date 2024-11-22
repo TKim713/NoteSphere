@@ -25,7 +25,12 @@ const Nav = () => {
   const [showFavorites, setShowFavorites] = useState(false);
   const [showNotes, setShowNotes] = useState(true);
   const [needToNavigate, setNeedToNavigate] = useState(false);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
+  useEffect(() => {
+    // Đặt state này thành true khi component được mount
+    setIsPageLoaded(true);
+  }, []);
   // Add a new note
   const handleAddNote = async (e) => {
     await createNote();
@@ -136,6 +141,7 @@ const Nav = () => {
                   containerType="normal"
                   notes={notes}
                   selectedNote={selectedNote}
+                  isPageLoaded={isPageLoaded}
                 />
                 {/* Load More Button */}
                 {/* {hasMoreNotes && (
