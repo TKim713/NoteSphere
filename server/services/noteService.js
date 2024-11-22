@@ -160,10 +160,13 @@ export const saveContentImageToNote = async (noteId, userId, file) => {
 
   const uploadResult = await NoteDao.uploadImageToCloudinary(file);
 
-  const newContentBlock = {
-    type: 'image',
-    value: uploadResult.secure_url,
-  };
+  const newContentBlock = encryptContent([
+    {
+      type: "image",
+      value: uploadResult.secure_url,
+    },
+  ])[0];
+
   const updatedContent = { $push: { content: newContentBlock } };
   return await NoteDao.updateNote(noteId, updatedContent);
 };

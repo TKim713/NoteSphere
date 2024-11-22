@@ -2,39 +2,67 @@ import MongooseClass from "../base/MongooseClass.js";
 import Note from "../../models/Note.js";
 import NoteListDao from "../noteList/index.js";
 import cloudinary from "../../middlewares/cloudinaryConfig.js";
+import { encryptContent, decryptContent } from "../../util/encryptionUtils.js";
+
 class NoteMongooseDao extends MongooseClass {
   constructor() {
     super(Note);
   }
 
   async fetchNoteById(id) {
-    return await this.collection.findOne({ id });
+    const note = await this.collection.findOne({ id });
+    if (note && note.content) {
+      note.content = decryptContent(note.content); // Giải mã nội dung
+    }
+    return note;
   }
 
   async fetchNotesByUserId(userId) {
-    return await this.collection.find({ userId });
+    const notes = await this.collection.find({ userId });
+    return notes.map((note) => {
+      if (note.content) {
+        note.content = decryptContent(note.content); // Giải mã nội dung
+      }
+      return note;
+    });
   }
 
   async fetchNoteContentById(id) {
-    return await this.collection.findOne({ id }).select("content userId");
+    const note = await this.collection.findOne({ id }).select("content userId");
+    if (note) {
+      note.content = decryptContent(note.content); // Decrypt content before returning
+    }
+    return note;
   }
 
   async fetchByTitle(title) {
-    return await this.collection.findOne({ title });
+    const note = await this.collection.findOne({ title });
+    if (note) {
+      note.content = decryptContent(note.content); // Decrypt content before returning
+    }
+    return note;
   }
 
-  // TODO: use session or cascading middleware
+  // Create a note with content encryption
   async createNote(noteDetails) {
+    if (noteDetails.content) {
+      noteDetails.content = encryptContent(noteDetails.content); // Encrypt array of content
+    }
     const createdNote = await this.collection.create(noteDetails);
-
     await NoteListDao.addNoteToNormalList(createdNote.userId, createdNote._id);
-
     return createdNote;
   }
 
+  // Create a duplicate note (no content encryption as we are copying the existing note)
   async createDuplicate({ existingNoteId, ...noteDetails }) {
+    // Encrypt the content if it exists
+    if (noteDetails.content) {
+      noteDetails.content = encryptContent(noteDetails.content); // Encrypt array of content
+    }
+
     const createdNote = await this.collection.create(noteDetails);
 
+    // Add the duplicate note to the normal list
     await NoteListDao.addDuplicateToNormalList({
       userId: createdNote.userId,
       existingNoteId,
@@ -44,20 +72,24 @@ class NoteMongooseDao extends MongooseClass {
     return createdNote;
   }
 
+  // Update an existing note (ensure encryption if content is updated)
   async updateNote(id, obj) {
-    return await this.collection.findOneAndUpdate({ id }, obj);
+    if (obj.content && Array.isArray(obj.content)) {
+      obj.content = encryptContent(obj.content); // Mã hóa trước khi cập nhật
+    }
+    return await this.collection.findOneAndUpdate({ id }, obj, { new: true });
   }
 
-  // TODO: use session or cascading middleware
+  // Delete a note by user and noteId
   async deleteNote(userId, noteId) {
     const { _id } = await this.collection.findOneAndDelete({ id: noteId });
-
     await NoteListDao.deleteNote(userId, _id);
   }
 
+  // Upload an image to Cloudinary
   async uploadImageToCloudinary(file) {
     if (!file) {
-      throw new Error("No file provided for upload.");
+throw new Error("No file provided for upload.");
     }
 
     try {
@@ -72,10 +104,12 @@ class NoteMongooseDao extends MongooseClass {
       throw new Error("Error uploading image to Cloudinary: " + err.message);
     }
   }
+
+  // Fetch notes by title with userId
   async fetchNoteByTitle(title, userId) {
     return await this.collection.find({
       userId,
-      title: { $regex: title, $options: "i" }, // Sử dụng regex để tìm kiếm không phân biệt chữ hoa/thường
+      title: { $regex: title, $options: "i" }, // Regex for case-insensitive search
     });
   }
 }
