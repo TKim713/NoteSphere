@@ -2,6 +2,7 @@ import NoteDao from "../daos/note/index.js";
 import NoteListDao from "../daos/noteList/index.js";
 import UserPermissionDao from "../daos/userPermission/index.js";
 import CustomError from "../models/CustomError.js";
+import { encryptContent } from "../util/encryptionUtils.js";
 
 const checkForExistingNoteAndPermission = async (userId, noteId, permission) => {
   const existingNote = await NoteDao.fetchNoteById(noteId);

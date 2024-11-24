@@ -191,33 +191,43 @@ const SelectedNote = () => {
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
     if (file && imageBlockIndex !== null) {
+      // Step 1: Add a temporary block for the local image preview
       const newContentBlocks = [...contentBlocks];
-      const imageUrl = URL.createObjectURL(file);
+      const tempImageUrl = URL.createObjectURL(file);
   
-      // Thêm block mới với hình ảnh sau block được chọn
-      newContentBlocks.splice(imageBlockIndex + 1, 0, { type: "image", value: imageUrl });
+      // Add a temporary block to display the image
+      newContentBlocks.splice(imageBlockIndex + 1, 0, { type: "image", value: tempImageUrl });
       setContentBlocks(newContentBlocks);
-      setImageBlockIndex(null); // Reset image block index sau khi thêm
+      setImageBlockIndex(null); // Reset imageBlockIndex
   
-      // API Call for image block
+      // Step 2: Start the upload to Cloudinary
       const formData = new FormData();
-      formData.append("contentImage", file); // Attach the image file
+      formData.append("contentImage", file);
   
-      // Replace 'yourAuthToken' with the actual token value you have
-      const token = localStorage.getItem("token"); // or wherever you're storing it
+      const token = localStorage.getItem("token"); // Fetch the auth token
   
       fetch(`http://localhost:8080/api/notes/${id}/uploadContentImage`, {
         method: "PUT",
         headers: {
-          "x-auth-token": token, // Add the token to headers
+          "x-auth-token": token,
         },
-        body: formData, // Send the formData with the image
+        body: formData,
       })
         .then((response) => response.json())
-        .then((data) => console.log("Image uploaded:", data))
+        .then((data) => {
+          // Step 3: Replace the temporary local URL with the encrypted Cloudinary URL
+          const updatedContentBlocks = [...contentBlocks];
+          const indexToUpdate = updatedContentBlocks.findIndex(
+            (block) => block.value === tempImageUrl
+          );
+          if (indexToUpdate !== -1) {
+            updatedContentBlocks[indexToUpdate] = { type: "image", value: data.secure_url }; // Use the BE's returned URL
+            setContentBlocks(updatedContentBlocks);
+          }
+        })
         .catch((error) => console.error("Error uploading image:", error));
     }
-  };
+  };  
   
   // Show popup for the specific block where "+" was clicked
   useEffect(() => {
