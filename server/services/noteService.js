@@ -2,7 +2,7 @@ import NoteDao from "../daos/note/index.js";
 import NoteListDao from "../daos/noteList/index.js";
 import UserPermissionDao from "../daos/userPermission/index.js";
 import CustomError from "../models/CustomError.js";
-import { encryptContent } from "../util/encryptionUtils.js";
+import { encryptContent, decryptContent } from "../util/encryptionUtils.js";
 
 const checkForExistingNoteAndPermission = async (userId, noteId, permission) => {
   const existingNote = await NoteDao.fetchNoteById(noteId);
@@ -36,11 +36,23 @@ export const fetchUserNotes = async (userId, { limit = 10, skip = 0 } = {}) => {
 
   paginatedNotes.hasMore = (skip + limit) < combinedNotes.length;
 
-  paginatedNotes.data = paginatedNotes.data.map((note) => ({
-    ...note,
-    isFavorite: notes.favoriteListOrder.some((favoriteNote) => favoriteNote.id === note.id),
-    isShared: notes.sharedListOrder.some((sharedNote) => sharedNote.note && sharedNote.note.id === note.id),
-  }));
+  paginatedNotes.data = paginatedNotes.data.map((note) => {
+    let decryptedCoverImage = note.coverImage;
+    try {
+      if (note.coverImage) {
+        decryptedCoverImage = decryptContent(note.coverImage);
+      }
+    } catch (error) {
+      console.error("Failed to decrypt coverImage for note:", note.id, error);
+    }
+
+    return {
+      ...note,
+      coverImage: decryptedCoverImage,
+      isFavorite: notes.favoriteListOrder.some((favoriteNote) => favoriteNote.id === note.id),
+      isShared: notes.sharedListOrder.some((sharedNote) => sharedNote.note && sharedNote.note.id === note.id),
+    };
+  });
 
   return paginatedNotes;
 };
@@ -105,7 +117,7 @@ export const saveChangesToNote = async (userId, noteId, noteDetails, file) => {
   let coverImageUrl = null;
   if (file) {
     const uploadResult = await NoteDao.uploadImageToCloudinary(file);
-    coverImageUrl = uploadResult.secure_url;
+    coverImageUrl = encryptContent(uploadResult.secure_url);
   }
 
   const updatedNoteDetails = coverImageUrl
